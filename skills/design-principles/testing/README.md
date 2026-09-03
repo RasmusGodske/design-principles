@@ -254,5 +254,5 @@ leaving the remainder running untouched.
 ## Stack bindings
 
 The rules above name roles (source roots, kinds, tiers, the tagging mechanism), not files. How each
-role is spelled in a concrete stack lives in `bindings/<stack>/README.md`. Today: [`bindings/laravel/`](bindings/laravel/README.md).
+role is spelled in a concrete stack lives in `bindings/<stack>/README.md`. Today: [`bindings/laravel/`](bindings/laravel/README.md), [`bindings/nestjs/`](bindings/nestjs/README.md).
 

@@ -45,7 +45,7 @@ Only things on the public surface are importable from outside the module. Placin
   | `data/entrypoints/{Handler}/` | **Handler I/O** owned by one entry point — the per-action payload, request data classes, and any child data classes private to that handler. Mirrors the handler's own location. Handler I/O is internal by nature — it lives under the internal `data/`, never `public/data/`. | `*PayloadData` for the per-action payload |
   | `data/views/` | **Shared presentational data classes** — resolved/projected shapes reused by ≥2 handlers (e.g. a domain data class enriched with display-resolved fields). Internal unless another module renders them. | `*ViewData` |
 
-  The placement rule, in one line: *owned by one handler → mirror the handler (internal); shared & presentational → `data/views/`; pure domain value → the root — `public/data/` if published, `data/` if internal.* The suffix signals the layer without reading the path — `*Data` (domain), `*PayloadData` (one handler's payload), `*ViewData` (shared presentational). Don't over-structure a module with three data classes — promote to the sub-buckets when the flat directory starts mixing the kinds.
+  The placement rule, in one line: *owned by one handler → mirror the handler (internal); shared & presentational → `data/views/`; pure domain value → the root — `public/data/` if published, `data/` if internal.* A suffix signals the layer without reading the path; the suffixes above are the neutral illustration and your binding spells them (`*Data` / `*PayloadData` / `*ViewData` in one stack, `*Dto` / `*RequestDto` / `*ViewDto` in another). Don't over-structure a module with three data classes — promote to the sub-buckets when the flat directory starts mixing the kinds.
 
 ### `public/enums/`
 

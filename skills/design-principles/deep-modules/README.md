@@ -91,7 +91,7 @@ Sections below cover the leaf shape (the default) in detail, with sub-modules an
 2. **Public surface is explicit.** Outside callers may only import a module's public surface — publication is an explicit act, never a side effect of directory kind. Where the language has a visibility mechanism, use it; where it doesn't, a directory plays that role. See [`public-surface.md`](public-surface.md).
 3. **Earned, not speculative.** Every optional structural element — internal services, sub-modules, variant frameworks, contracts, wiring files — is added only when it earns its place. See [`promotion-criteria.md`](promotion-criteria.md).
 4. **Mutations go through public services.** Entry points (HTTP handlers, CLI commands, listeners, jobs) are thin and delegate. State changes never originate in an entry point.
-5. **Names describe what a thing is, not where it lives.** The module name belongs in the namespace / package path, not the class name. See [`naming-and-placement.md`](naming-and-placement.md).
+5. **Names describe what a thing is, not where it lives.** The module name belongs in the namespace / package path. A class carries the module's name only when it is the module's face toward an outsider — its primary public service, or the pieces the framework registers per module (the binding lists them). See [`naming-and-placement.md`](naming-and-placement.md).
 
 ### The default shape
 
@@ -180,7 +180,7 @@ Variants and sub-modules compose. A variant can itself contain `modules/` for it
 3. **Internal roles.** Everything outside the public surface is private to the module — internal services, models, internal data/enums, entry points — only the module itself imports from these.
 4. **Mutations go through public services.** HTTP handlers, CLI commands, tool endpoints, listeners are thin entry points that delegate. State changes never originate in an entry point.
 5. **No junk drawers.** `helpers/`, `util/`, `common/`, `shared/`, `misc/` are forbidden anywhere in the source tree.
-6. **Naming.** Names describe what a class IS, not where it lives. Module name lives in the namespace / package path, not the class name. Before placing a new class, name 1–2 alternative homes and pick the strongest.
+6. **Naming.** Names describe what a class IS, not where it lives. Only a module's faces — its primary public service and the pieces the framework registers per module — carry the module's name; everything it contains, published or not, is named for what it is. Before placing a new class, name 1–2 alternative homes and pick the strongest.
 7. **Optional elements earned.** Framework/variant splits, sub-modules, contracts, wiring files, internal services are added only when they earn their place. See [`promotion-criteria.md`](promotion-criteria.md).
 
 ## Reading map
@@ -200,7 +200,7 @@ This README is the spine. Load other files only when the task requires depth.
 | [`legacy-code.md`](legacy-code.md) | Working in a codebase that pre-dates the convention |
 | [`visualization.md`](visualization.md) | Drawing or explaining a structure (ASCII, Mermaid) |
 | [`examples/`](examples/README.md) | Looking for a matching pattern from a worked example |
-| [`bindings/`](bindings/) | Stack bindings — the real directory names, wiring mechanism and enforcement tool for a specific stack; today: [`laravel`](bindings/laravel/README.md) |
+| [`bindings/`](bindings/) | Stack bindings — the real directory names, wiring mechanism, the module's framework-facing classes, and the enforcement tool for a specific stack; today: [`laravel`](bindings/laravel/README.md), [`nestjs`](bindings/nestjs/README.md) |
 
 ## Stack bindings
 

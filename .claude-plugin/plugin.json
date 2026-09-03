@@ -1,6 +1,6 @@
 {
   "name": "design-principles",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Design principles for maintainable, testable, decoupled code. Stack-agnostic lenses with per-stack bindings, loaded before planning a feature, adding a module, reviewing a diff, or placing code, tests, or docs.",
   "author": {
     "name": "RasmusGodske"

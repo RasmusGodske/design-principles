@@ -66,7 +66,7 @@ The principle docs use an illustrative, language-neutral vocabulary for a module
 <principle>/bindings/<stack>/README.md      e.g. deep-modules/bindings/laravel/README.md
 ```
 
-Bindings exist today for: **laravel** (`deep-modules`, `testing`).
+Bindings exist today for: **laravel** (`deep-modules`, `testing`) and **nestjs** (`deep-modules`, `testing`).
 
 How to use them:
 

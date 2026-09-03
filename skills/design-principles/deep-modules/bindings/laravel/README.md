@@ -53,6 +53,17 @@ app/Modules/{Domain}/
 └── Listeners/
 ```
 
+## The module's faces (naming)
+
+Per [`naming-and-placement.md`](../../naming-and-placement.md), only a module's faces carry its name. In Laravel those are:
+
+| Face | Class | Toward whom |
+|---|---|---|
+| Primary public service | `BillingService` in `Public/Services/` | other modules |
+| Wiring | `BillingServiceProvider` at the module root, only when one is earned | the container |
+
+Controllers are *not* faces here: Laravel registers routes by FQCN in `routes/`, so a controller is named for the resource or action it handles (`InvoiceController`, `RefundController`), never `BillingController`. Everything else — secondary services, models, data classes, enums, jobs, listeners — is named for what it is.
+
 ## Things Laravel makes specific
 
 - **Routes** import controllers by FQCN; that is a route file's job, and route files live outside `app/` (`routes/`). A module does not register routes from its provider.
