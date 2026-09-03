@@ -39,14 +39,23 @@ Start at [`skills/design-principles/SKILL.md`](skills/design-principles/SKILL.md
 
 ## Install
 
-Claude Code discovers skills in `~/.claude/skills/` (user-wide) or `<project>/.claude/skills/` (per project). Clone and symlink:
+The repo is a Claude Code plugin marketplace containing one plugin. In Claude Code:
+
+```
+/plugin marketplace add RasmusGodske/design-principles
+/plugin install design-principles@design-principles
+```
+
+The skill then loads automatically when a task matches its description, or on demand as `/design-principles:design-principles`. Update with `/plugin marketplace update design-principles`.
+
+**Without the plugin system** (other agents, or a plain skills directory): clone and symlink the skill folder.
 
 ```sh
 git clone https://github.com/RasmusGodske/design-principles.git ~/.local/share/design-principles
 ln -s ~/.local/share/design-principles/skills/design-principles ~/.claude/skills/design-principles
 ```
 
-Update with `git -C ~/.local/share/design-principles pull`.
+Update with `git -C ~/.local/share/design-principles pull`. Use one method or the other; both at once loads the skill twice.
 
 ## Layout
 

@@ -1,0 +1,15 @@
+{
+  "name": "design-principles",
+  "description": "Design principles for maintainable, testable, decoupled code, packaged as a stack-agnostic skill for coding agents.",
+  "owner": {
+    "name": "RasmusGodske",
+    "url": "https://github.com/RasmusGodske"
+  },
+  "plugins": [
+    {
+      "name": "design-principles",
+      "source": "./",
+      "description": "Deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, data minimization, framework vs implementation, testing shape, documentation placement and discoverability. Load before planning a feature, adding a module, reviewing a diff, or deciding where code, tests, or docs go."
+    }
+  ]
+}
