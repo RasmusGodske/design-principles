@@ -1,6 +1,6 @@
 ---
 name: design-principles
-description: Design principles for maintainable, testable, decoupled code — deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, data minimization, framework vs implementation, testing shape, documentation placement and discoverability. Load BEFORE planning a feature, adding a module/service/class, reviewing a diff, or deciding where code, tests, or docs go. Any language or framework; stack-specific bindings live inside.
+description: Design principles for maintainable, testable, decoupled code — deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, safe deletion, data minimization, framework vs implementation, testing shape, documentation placement and discoverability. Load BEFORE planning a feature, adding a module/service/class, reviewing a diff, or deciding where code, tests, or docs go. Any language or framework; stack-specific bindings live inside.
 ---
 
 # Design Principles
@@ -20,6 +20,7 @@ These are **lenses** — ways of looking at a design or a diff that sharpen the 
 | **Data Minimization** | Durable records hold references, not copies of personal data; keep only what the result depends on; privacy mechanisms fail closed. | What may *endure* (retention, copies, side-channels) | [data-minimization/](./data-minimization/README.md) |
 | **Framework and Implementation** | The framework defines the shape of contracts and offers lockers for implementation data; implementations own all the semantics; found deliberately, then grow only on evidence. | The framework/implementation *boundary* (where behaviour lives) | [framework-and-implementation/](./framework-and-implementation/README.md) |
 | **Single Chokepoint per Fact** | Each piece of stored data has exactly one place in the code that creates, changes, or deletes it; every button, job, and webhook calls that one place. | How many code paths may *change* a piece of data | [single-chokepoint-per-fact/](./single-chokepoint-per-fact/README.md) |
+| **Safe Deletion** | A user may delete something only when nothing depends on it: refuse while something live uses it, archive when only history refers to it, so the history keeps resolving. | Whether and how a thing may be *removed* | [safe-deletion/](./safe-deletion/README.md) |
 | **Testing** | Where a test lives says what it covers; what it costs to run is declared inside it — so one subject keeps one test file. | The test suite's *shape* | [testing/](./testing/README.md) |
 | **Documentation Placement** | Documentation lives at the altitude that matches it — code-describing docs beside the code, cross-cutting concepts centralized, a directory earning structure only as it grows. | Where documentation *lives* | [documentation-placement/](./documentation-placement/README.md) |
 | **Discoverable Knowledge** | Knowledge no one can find might as well not exist — every document reachable from a known root and every reference self-describing. | The documentation *graph* | [discoverable-knowledge/](./discoverable-knowledge/README.md) |
@@ -36,6 +37,7 @@ These are **lenses** — ways of looking at a design or a diff that sharpen the 
 | Storing, copying, logging, or exporting anything that touches a person | Data Minimization |
 | Building a host-with-plugins shape (engines, integrations, exporters) | Framework and Implementation |
 | Adding a second code path that writes the same data (job + button, webhook + poller) | Single Chokepoint per Fact |
+| Adding a delete/remove action, or choosing between archive and delete | Safe Deletion |
 | Adding or moving a test, or choosing what a test targets | Testing, then Deep Modules → `testing.md` |
 | Writing or relocating a doc | Documentation Placement, then Discoverable Knowledge |
 | Reviewing a diff | Walk the table top to bottom; name the lenses that apply and one finding each |
@@ -53,6 +55,7 @@ They compose rather than compete — each makes a different claim:
 - **Data Minimization** is about *what may endure*: whether a durable record, secondary store, or committed artifact is allowed to keep a copy at all. It leans on config-and-record for the snapshot-vs-reference mechanics and bounds the persistence decisions pure-core pushes to the shell.
 - **Framework and Implementation** is about *a behaviour's home* in a host-with-plugins topology: the shared framework holds only what is invariant across implementations; each implementation owns its semantics; capability waits inside one implementation until a second consumer justifies promotion. It applies deep-modules' earned-not-speculative economics to that specific boundary.
 - **Single Chokepoint per Fact** is about *how data gets changed*: however many ways the same piece of data can be created, changed, or deleted, they all call one shared place — built with the *first* caller (in deliberate contrast to framework-and-implementation's wait-for-the-second-consumer, because the write code is being written today either way). It sharpens detachable-domain one step finer: that lens stops outsiders touching a domain's models; this one stops the domain itself from growing two definitions of the same thing.
+- **Safe Deletion** is about *removal*: whether a user may delete something, may only archive it, or is refused because something live uses it. It takes config-and-record's split as its vocabulary (records are the history it protects, frozen copies are how a configuration's past survives a change) and applies single-chokepoint to the question "may this go?" — one dependency check per entity, consulted by every remove path.
 - **Testing** insists that where a test lives is derived from its subject, and that everything that *isn't* the subject — how expensive the test is to run — moves out of the path and into a declaration inside the test. It leans on deep-modules for *what* a test should target (a module's public promise, not its internals).
 - **Documentation Placement** and **Discoverable Knowledge** are the documentation-side pair: the first decides where a doc lives, the second whether it can be found. They are to docs what deep-modules (shape) and detachable-domain (topology) are to source.
 

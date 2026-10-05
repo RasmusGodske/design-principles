@@ -13,6 +13,7 @@ The principles are **lenses**, not procedures: each one is a way of looking at a
 | Data Minimization | Durable records hold references, not copies of personal data; privacy mechanisms fail closed. |
 | Framework and Implementation | The framework holds only the invariant shape; implementations own the semantics; promote on evidence. |
 | Single Chokepoint per Fact | One place in the code creates, changes, or deletes each piece of data. |
+| Safe Deletion | Delete only when nothing depends on it; refuse while something live uses it, archive when only history refers to it. |
 | Testing | A test's location says what it covers; its cost is declared inside it. |
 | Documentation Placement | Docs live at the altitude that matches them. |
 | Discoverable Knowledge | Every document reachable from a known root; every reference self-describing. |
