@@ -14,6 +14,8 @@ Dropping a column feels safe when nothing seems to read it. But sometimes someth
 
 Retiring instead costs almost nothing and keeps the way back open.
 
+It also makes the change faster to review. A reviewer who can see that a migration is fully reversible only has to check that the rollback works; if something turns out wrong later, it can be undone. A migration that really deletes data has to be reviewed for every possible consequence, because there is no second chance.
+
 ## When to read this
 
 Whenever a migration:
