@@ -1,7 +1,7 @@
 ---
 type: binding-rule
 title: Retire, Don't Erase — Laravel binding
-description: How to retire a column or table and how to back up rewritten or deleted rows in a Laravel migration, so its down() restores the data and not just the schema. Names, columns, comments and the up()/down() patterns.
+description: How to retire a column or table and back up changed or deleted rows in a Laravel migration, so down() brings the data back. Names, comments and up()/down() examples.
 ---
 
 # Retire, Don't Erase — Laravel binding

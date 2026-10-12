@@ -1,76 +1,56 @@
 ---
 type: concept-explainer
 title: Retire, Don't Erase
-description: Why a change that removes or overwrites stored information must always leave a way back — retire the thing or keep a backup of what changed — and what a real way back has to do. Open when writing a schema change, a data fix, a backfill or a bulk script that drops, rewrites or deletes stored data, or when reviewing one.
+description: Read before writing a database migration that drops a column or table, deletes rows, or rewrites existing data. Don't delete — retire the column or table (rename it, keep the data), and back up existing values before rewriting them, so the migration can always be rolled back with the data intact.
 ---
 
 # Retire, Don't Erase
 
-> **A change that removes or overwrites stored information always leaves a way back. Take the thing out of service instead of destroying it, or keep a backup of exactly what you changed. A way back restores the information, not just the structure that held it.**
+> **Don't drop a column or table in a migration — retire it. Before a migration changes existing data, back up the values it changes. Always leave yourself a way back.**
 
-Start with a story. Orders used to carry a *delivery method* setting, and the warehouse now ships every order the same way, so the setting has nothing left to choose. A schema change drops the column. Its undo step adds the column back with every order set to the default, and the change ships. Three weeks later someone finds that the finance team's monthly report still split revenue by delivery method. The undo runs fine and the column is back, but every value in it says the same thing. What each order actually had is gone, and nothing warned anyone on the day.
+## Why
 
-The change itself was right; the setting really was dead. What went wrong is that the change made the decision *final* at the same moment it made it *true*. Finding out that something still depended on the data is normal. Not being able to go back is the failure.
+Dropping a column feels safe when nothing seems to read it. But sometimes something does: a report, an export, a job nobody remembered. Once the migration has dropped the column, the data is gone, and rolling back gives you an empty column at best.
 
-This lens is about changes made by the people building the system: schema changes, data fixes, backfills, bulk scripts. What a *user* may remove, and when, is [safe deletion](../safe-deletion/README.md).
+Retiring instead costs almost nothing and keeps the way back open.
 
-## Two ways to leave a way back
+## When to read this
 
-| | Use when | What you do |
-|---|---|---|
-| **Retire** | A whole column, field, table or file stops being used | Take it out of service but keep it: rename it with a `retired_` prefix so nothing reads it by accident, and anything that still does fails loudly instead of quietly getting nothing |
-| **Back up** | Values are rewritten in place, or rows are deleted | Before changing anything, copy exactly what you are about to change into a backup made for this one change; the undo restores from it |
+Whenever a migration:
 
-Retiring keeps the information where it was, so undoing is a rename. A backup is for when the information itself has to change: the old values have nowhere else to live, so they get a dedicated place of their own.
+- drops a column or a table,
+- rewrites values in existing rows (fixing data, changing a format, merging one field into another), or
+- deletes rows.
 
-Either way, the decision to erase for good is a separate, deliberate act, taken later by someone who knows the retired thing or the backup is no longer needed. This lens does not say when that is. It only says the change itself must not take that decision.
+## Removing a column or table: retire it
 
-## What a real way back does
+Rename it with a `retired_` prefix instead of dropping it, for example `delivery_method` → `retired_delivery_method`.
 
-**1. It restores the information, not just the structure.** A column that comes back empty, or filled with a default, is not an undo. The test: after undoing, does every record hold exactly what it held before?
+- The data stays where it is.
+- Code that still uses the old name fails loudly, so you find out instead of silently getting nothing.
+- Rolling back is just renaming it back.
 
-**2. It never overwrites later work.** Between the change and the undo, people and processes keep working. The undo only restores a record that is still exactly as the change left it. If a record has moved on since, the undo stops and names it, rather than silently throwing that later work away. This is why a backup keeps what the change *wrote* next to what it *replaced*: comparing the two is how the undo knows whether a record is still its own.
+Drop the retired column later, in a separate migration, once you're sure nothing needs it. How long to wait is your call.
 
-**3. It is all-or-nothing, and so is the change.** The change checks its own result before it commits (did every rewritten record end up as intended?) and rolls back entirely if not. The undo does the same. A half-applied change, or a half-applied undo, leaves data that matches neither the before nor the after, and that is the hardest state to recover from.
+## Changing existing data: back it up first
 
-## Leave a trail
+Before the migration changes existing rows, copy the values it is about to change into a backup table made for that migration. Store both the old value and the new one. When rows are deleted, back up the whole row.
 
-Anything retired, and every backup, says where it came from and why, on the thing itself: which change created it, and what that change did. Someone who finds a `retired_` field or a backup years later should be able to trace it back without asking anyone, and decide on their own whether it can finally go.
+- Rolling back copies the old values back.
+- Only restore rows that still hold the new value. If a row has changed since the migration ran, stop and report it instead of overwriting that later change.
 
-Write the reason, not just a pointer. The change that created it may itself be pruned, squashed or archived one day; a reason written on the retired thing still stands on its own.
+## Two rules for the way back
 
-## Worked examples
+- **Rolling back restores the data, not just the column.** A column that comes back empty or filled with a default is not a rollback.
+- **Leave a note.** Every retired column or table, and every backup table, gets a comment saying which migration created it and why. Someone who finds it a year later should understand it without asking anyone.
 
-| Change | Way back |
-|---|---|
-| Drop a setting nothing reads any more | Retire the field (`retired_delivery_method`); undoing renames it back |
-| Drop a whole table of a feature that was removed | Retire the table; undoing renames it back |
-| Rewrite a formula stored on many records | Back up each record's old and new formula; undoing restores records still holding the new one |
-| Normalize spellings (`canceled` → `cancelled`) | Back up the affected records' old and new value |
-| Delete orphaned rows | Back up the whole rows; undoing puts them back |
-| Rename a column that is still in use | Not destruction: the information survives. A plain rename back is a complete undo |
-| Drop a cache or a derived column that can be recomputed | No way back needed: recompute it |
+## When you don't need this
 
-## Quick checks
+- The data can be recalculated, like a cache or a derived value.
+- The migration has never run anywhere but your own machine. Just fix it.
+- The law requires the data to be erased. Then erase it.
 
-1. **Run the undo in your head.** After it runs, does every record hold exactly what it held before the change? If any value comes back as a default, a blank or a guess, the change is not reversible.
-2. **Play out the late discovery.** A month from now someone finds that a report still read this data. What do they do? "Undo the change" is a good answer; "restore last month's full database" is not.
-3. **Play out the busy undo.** Records changed since the change ran. Does the undo leave them alone and say so, or overwrite them?
-4. **Read the trail.** Someone finds the retired field or the backup with no context. Does it tell them what created it and why?
+## Related
 
-## When it applies, and when not
-
-**Use this lens** whenever a change removes, rewrites or deletes stored information: dropping a column, field or table, rewriting values in place, deleting rows in bulk, or replacing a stored document with a new shape.
-
-**Don't overdo it:**
-
-- **Recomputable data needs no backup.** A cache, an index or a derived value that can be rebuilt from what remains is already recoverable.
-- **Changes that never shipped can simply be redone.** A change that has only run on a developer's machine has no history to protect; fix it in place.
-- **Erasure the law requires is final on purpose.** When personal data must be gone, a backup of it would defeat the point. [Data minimization](../data-minimization/README.md) wins, and that erasure runs as its own deliberate operation.
-- **Keep the backup to what changed.** Copy the values the change touches, not whole tables "just in case". A backup that holds more than the undo needs is a second copy of data to look after.
-
-## Relation to the other lenses
-
-- [`safe-deletion`](../safe-deletion/README.md) is the user-facing sibling: it decides whether a user may remove a thing, and keeps history resolving through archive. This lens covers the changes builders make to stored data, where there is no user and no archive button, only the change and its undo.
-- [`data-minimization`](../data-minimization/README.md) pulls the other way on purpose. A backup is a copy, so it holds only what the undo needs, and where erasure is required, erasure wins.
-- [`single-chokepoint-per-fact`](../single-chokepoint-per-fact/README.md): a bulk rewrite is still a write. If the data has a chokepoint, a backfill that bypasses it should at least produce what the chokepoint would have, and the backup is what lets you correct it if not.
+- [Safe deletion](../safe-deletion/README.md) is about what *users* may delete. This one is about what *migrations* delete.
+- [Data minimization](../data-minimization/README.md): a backup is a copy of data, so keep only what the rollback needs.

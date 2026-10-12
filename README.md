@@ -14,7 +14,7 @@ The principles are **lenses**, not procedures: each one is a way of looking at a
 | Framework and Implementation | The framework holds only the invariant shape; implementations own the semantics; promote on evidence. |
 | Single Chokepoint per Fact | One place in the code creates, changes, or deletes each piece of data. |
 | Safe Deletion | Delete only when nothing depends on it; refuse while something live uses it, archive when only history refers to it. |
-| Retire, Don't Erase | A change that removes or overwrites stored data always leaves a way back: retire it, or back up what changed. |
+| Retire, Don't Erase | Don't drop columns or tables in a migration — retire them; back up data before changing it. Always keep a way back. |
 | Testing | A test's location says what it covers; its cost is declared inside it. |
 | Documentation Placement | Docs live at the altitude that matches them. |
 | Discoverable Knowledge | Every document reachable from a known root; every reference self-describing. |
