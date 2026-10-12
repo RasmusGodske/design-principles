@@ -9,7 +9,7 @@
     {
       "name": "design-principles",
       "source": "./",
-      "description": "Deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, data minimization, framework vs implementation, testing shape, documentation placement and discoverability. Load before planning a feature, adding a module, reviewing a diff, or deciding where code, tests, or docs go."
+      "description": "Deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, safe deletion, retire don't erase, data minimization, framework vs implementation, testing shape, documentation placement and discoverability. Load before planning a feature, adding a module, reviewing a diff, or deciding where code, tests, or docs go."
     }
   ]
 }
