@@ -53,7 +53,7 @@ trait DeterministicTestEnvironment
 |---|---|
 | Extends Laravel's `Illuminate\Foundation\Testing\TestCase` | Automatically: Laravel calls `setUp{TraitName}()` and `tearDown{TraitName}()` for every trait a test case uses. Just `use` it. |
 | Extends PHPUnit's `TestCase` and boots the application itself | Call `setUpDeterministicTestEnvironment()` after creating the application, and the tear-down before flushing it. |
-| Browser tests | Leave the clock out: the browser runs its own JavaScript clock, which a fixed PHP clock would contradict. Seeding and blocking stray requests still apply. |
+| Browser tests | The clock starts at `FIXED_NOW` but runs in real time, because the browser's does: override the clock step with `$start->addMicroseconds(elapsed)`. A global middleware, registered by the browser base class, puts a script at the top of every HTML page that shifts the browser's `Date` to the server's `now()`, so PHP and JavaScript agree on today, and `travelTo()` takes the browser along. Leave timers alone: a frozen `Date` stalls debounces. |
 
 **Why a clock that advances per reading.** A frozen clock (`freezeTime()` for the whole suite) makes every `created_at` equal, so "latest first" orderings tie. A clock that follows real elapsed time from a fixed start makes results depend on how fast the machine runs: a test generating dates "in the last 30 days" gets different dates on a busy CI runner. One millisecond per reading keeps timestamps ordered and depends only on what the test does.
 
