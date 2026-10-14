@@ -99,3 +99,4 @@ The principle asks for one recognisable suffix per layer so the name alone tells
 - [`directories.md`](directories.md) — what goes where
 - [`promotion-criteria.md`](promotion-criteria.md) — how speculative naming leads to speculative directories
 - [`bindings/`](bindings/) — which classes are a module's faces in each stack, and how suffixes are spelled
+- [`explicit-names`](../explicit-names/README.md) — the names of the variables, properties and methods that use a class: a variable holding a class carries its full name
