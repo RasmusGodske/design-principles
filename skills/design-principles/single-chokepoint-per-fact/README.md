@@ -69,7 +69,7 @@ There's no contradiction. An abstraction built early is a *guess* about future n
 
 **Don't overdo it:**
 
-- **Reading needs no chokepoint.** Have as many queries as you like — this principle is about *changing* data.
+- **Reading needs no chokepoint.** Have as many queries as you like — this principle is about *changing* data. (Deciding what an actor may *see* is a different question, with its own chokepoint, the on-behalf service: [acting on behalf](../acting-on-behalf/README.md).)
 - **One chokepoint per piece of data — not one giant service for everything.** A domain has many small, named services. Funneling a whole module through one mega-service is a junk drawer wearing this principle's clothes.
 - **Channel-specific work stays in the channel.** Parsing a webhook's envelope or mapping a vendor's field names is honestly per-channel. The shared function starts where the data *means* something.
 - **Tests may bypass on purpose.** Where models are guarded that way, they need a loud, explicit escape hatch for legitimate cases (seeding, the service's own internals). The point is that going around the wall is a visible decision, never an accident.
