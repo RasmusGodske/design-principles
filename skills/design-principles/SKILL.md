@@ -1,6 +1,6 @@
 ---
 name: design-principles
-description: Design principles for maintainable, testable, decoupled code — deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, safe deletion, retire don't erase, data minimization, framework vs implementation, testing shape, documentation placement and discoverability. Load BEFORE planning a feature, adding a module/service/class, writing a migration that drops or changes data, reviewing a diff, or deciding where code, tests, or docs go. Any language or framework; stack-specific bindings live inside.
+description: Design principles for maintainable, testable, decoupled code — deep modules, pure core / persistent shell, detachable domain, config vs record, single chokepoint per fact, safe deletion, retire don't erase, data minimization, framework vs implementation, testing shape, deterministic tests, documentation placement and discoverability. Load BEFORE planning a feature, adding a module/service/class, writing a migration that drops or changes data, reviewing a diff, or deciding where code, tests, or docs go. Any language or framework; stack-specific bindings live inside.
 ---
 
 # Design Principles
@@ -23,6 +23,7 @@ These are **lenses** — ways of looking at a design or a diff that sharpen the 
 | **Safe Deletion** | A user may delete something only when nothing depends on it: refuse while something live uses it, archive when only history refers to it, so the history keeps resolving. | Whether and how a thing may be *removed* | [safe-deletion/](./safe-deletion/README.md) |
 | **Retire, Don't Erase** | Don't drop a column or table in a migration — retire it (rename it, keep the data). Back up existing values before a migration changes them. Always keep a way back. | Whether a migration can be *rolled back* with its data | [retire-dont-erase/](./retire-dont-erase/README.md) |
 | **Testing** | Where a test lives says what it covers; what it costs to run is declared inside it — so one subject keeps one test file. | The test suite's *shape* | [testing/](./testing/README.md) |
+| **Deterministic Tests** | A test gives the same answer every time it runs; every input it doesn't own — clock, randomness, network, shared state — is controlled by default in the base test case, and opting out is written down. | Whether a test's *answer* can be trusted | [deterministic-tests/](./deterministic-tests/README.md) |
 | **Documentation Placement** | Documentation lives at the altitude that matches it — code-describing docs beside the code, cross-cutting concepts centralized, a directory earning structure only as it grows. | Where documentation *lives* | [documentation-placement/](./documentation-placement/README.md) |
 | **Discoverable Knowledge** | Knowledge no one can find might as well not exist — every document reachable from a known root and every reference self-describing. | The documentation *graph* | [discoverable-knowledge/](./discoverable-knowledge/README.md) |
 
@@ -41,6 +42,7 @@ These are **lenses** — ways of looking at a design or a diff that sharpen the 
 | Adding a delete/remove action, or choosing between archive and delete | Safe Deletion |
 | Writing a migration that drops a column or table, deletes rows, or changes existing data | Retire, Don't Erase |
 | Adding or moving a test, or choosing what a test targets | Testing, then Deep Modules → `testing.md` |
+| Writing a test that touches time, generated data or another service — or chasing a test that fails "for no reason" | Deterministic Tests |
 | Writing or relocating a doc | Documentation Placement, then Discoverable Knowledge |
 | Reviewing a diff | Walk the table top to bottom; name the lenses that apply and one finding each |
 
@@ -60,6 +62,7 @@ They compose rather than compete — each makes a different claim:
 - **Safe Deletion** is about *removal*: whether a user may delete something, may only archive it, or is refused because something live uses it. It takes config-and-record's split as its vocabulary (records are the history it protects, frozen copies are how a configuration's past survives a change) and applies single-chokepoint to the question "may this go?" — one dependency check per entity, consulted by every remove path.
 - **Retire, Don't Erase** is safe-deletion's counterpart for migrations: instead of dropping a column or table, retire it, and back up existing values before changing them, so a rollback brings the data back. Data-minimization bounds it: a backup keeps only what the rollback needs.
 - **Testing** insists that where a test lives is derived from its subject, and that everything that *isn't* the subject — how expensive the test is to run — moves out of the path and into a declaration inside the test. It leans on deep-modules for *what* a test should target (a module's public promise, not its internals).
+- **Deterministic Tests** is about *whether a test's answer can be trusted*: it may depend only on the code and on what the test sets up. It makes testing's move — the safe choice is the one you get by declaring nothing — for a test's inputs, borrows single-chokepoint's (each control lives once, in the base test case), and has least to police where pure-core has done its work, since a pure computation is deterministic by construction.
 - **Documentation Placement** and **Discoverable Knowledge** are the documentation-side pair: the first decides where a doc lives, the second whether it can be found. They are to docs what deep-modules (shape) and detachable-domain (topology) are to source.
 
 The code lenses share one tool — the data class as the medium across boundaries — which is why they look overlapping. The division: deep-modules shapes the surface, pure-core keeps a computation clean inside, detachable-domain decides what may cross the surface and who owns the model behind it, and config-and-record decides what identity the things crossing it carry.
@@ -72,7 +75,7 @@ The principle docs use an illustrative, language-neutral vocabulary for a module
 <principle>/bindings/<stack>/README.md      e.g. deep-modules/bindings/laravel/README.md
 ```
 
-Bindings exist today for: **laravel** (`deep-modules`, `testing`, `retire-dont-erase`) and **nestjs** (`deep-modules`, `testing`).
+Bindings exist today for: **laravel** (`deep-modules`, `testing`, `retire-dont-erase`, `deterministic-tests`) and **nestjs** (`deep-modules`, `testing`).
 
 How to use them:
 
