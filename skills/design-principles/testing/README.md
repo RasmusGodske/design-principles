@@ -250,6 +250,7 @@ leaving the remainder running untouched.
 
 - [Documentation Placement](../documentation-placement/README.md) — the same location-follows-subject reasoning, applied to docs
 - [Deep Modules](../deep-modules/README.md) — for *what* to test under a module convention, see its [testing note](../deep-modules/testing.md)
+- [Deterministic Tests](../deterministic-tests/README.md) — a test's inputs (clock, randomness, network) controlled by default, so the answer of any slice you run can be trusted
 
 ## Stack bindings
 

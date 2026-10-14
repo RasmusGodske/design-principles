@@ -1,6 +1,6 @@
 {
   "name": "design-principles",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Design principles for maintainable, testable, decoupled code. Stack-agnostic lenses with per-stack bindings, loaded before planning a feature, adding a module, reviewing a diff, or placing code, tests, or docs.",
   "author": {
     "name": "RasmusGodske"
@@ -8,5 +8,5 @@
   "license": "MIT",
   "homepage": "https://github.com/RasmusGodske/design-principles",
   "repository": "https://github.com/RasmusGodske/design-principles",
-  "keywords": ["design-principles", "architecture", "deep-modules", "testing", "documentation", "skills"]
+  "keywords": ["design-principles", "architecture", "deep-modules", "testing", "deterministic-tests", "documentation", "skills"]
 }
