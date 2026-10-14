@@ -13,6 +13,8 @@ The principles are **lenses**, not procedures: each one is a way of looking at a
 | Data Minimization | Durable records hold references, not copies of personal data; privacy mechanisms fail closed. |
 | Framework and Implementation | The framework holds only the invariant shape; implementations own the semantics; promote on evidence. |
 | Single Chokepoint per Fact | One place in the code creates, changes, or deletes each piece of data. |
+| Acting on Behalf | Every request an actor makes passes one thin on-behalf service that decides what they may see and do. |
+| Data View | Every view of the data is built by one data view from on-behalf services' answers; pages, APIs and tools only present it. |
 | Safe Deletion | Delete only when nothing depends on it; refuse while something live uses it, archive when only history refers to it. |
 | Retire, Don't Erase | Don't drop columns or tables in a migration — retire them; back up data before changing it. Always keep a way back. |
 | Testing | A test's location says what it covers; its cost is declared inside it. |
