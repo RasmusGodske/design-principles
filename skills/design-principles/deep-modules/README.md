@@ -1,7 +1,7 @@
 ---
 type: concept-explainer
 title: Deep Modules
-description: Depth is leverage — hide a lot of behaviour behind a small interface; plus the module-structure convention that makes that shape mechanical: an explicit public surface, an enforceable boundary, and a recursive layout, in any language.
+description: 'Depth is leverage — hide a lot of behaviour behind a small interface; plus the module-structure convention that makes that shape mechanical: an explicit public surface, an enforceable boundary, and a recursive layout, in any language.'
 ---
 
 # Deep Modules
@@ -90,7 +90,7 @@ Sections below cover the leaf shape (the default) in detail, with sub-modules an
 1. **Deep modules over shallow ones.** A module hides a lot of behaviour behind a small interface. If deleting the module wouldn't make N callers more complex, the module is a pass-through and shouldn't exist.
 2. **Public surface is explicit.** Outside callers may only import a module's public surface — publication is an explicit act, never a side effect of directory kind. Where the language has a visibility mechanism, use it; where it doesn't, a directory plays that role. See [`public-surface.md`](public-surface.md).
 3. **Earned, not speculative.** Every optional structural element — internal services, sub-modules, variant frameworks, contracts, wiring files — is added only when it earns its place. See [`promotion-criteria.md`](promotion-criteria.md).
-4. **Mutations go through public services.** Entry points (HTTP handlers, CLI commands, listeners, jobs) are thin and delegate. State changes never originate in an entry point.
+4. **Mutations go through public services.** Entry points (HTTP handlers, CLI commands, listeners, jobs) are thin and delegate. State changes never originate in an entry point. An entry point that serves an actor (a person, an API client, an audited job) delegates to the module's on-behalf services; see [acting on behalf](../acting-on-behalf/README.md).
 5. **Names describe what a thing is, not where it lives.** The module name belongs in the namespace / package path. A class carries the module's name only when it is the module's face toward an outsider — its primary public service, or the pieces the framework registers per module (the binding lists them). See [`naming-and-placement.md`](naming-and-placement.md).
 
 ### The default shape
@@ -181,7 +181,7 @@ Variants and sub-modules compose. A variant can itself contain `modules/` for it
 4. **Mutations go through public services.** HTTP handlers, CLI commands, tool endpoints, listeners are thin entry points that delegate. State changes never originate in an entry point.
 5. **No junk drawers.** `helpers/`, `util/`, `common/`, `shared/`, `misc/` are forbidden anywhere in the source tree.
 6. **Naming.** Names describe what a class IS, not where it lives. Only a module's faces — its primary public service and the pieces the framework registers per module — carry the module's name; everything it contains, published or not, is named for what it is. Before placing a new class, name 1–2 alternative homes and pick the strongest.
-7. **Optional elements earned.** Framework/variant splits, sub-modules, contracts, wiring files, internal services are added only when they earn their place. See [`promotion-criteria.md`](promotion-criteria.md).
+7. **Optional elements earned.** Framework/variant splits, sub-modules, contracts, wiring files, internal services are added only when they earn their place. A sub-module is a slice of the domain, never a way of presenting it: no sub-module for a page, a screen, a tab or a view. See [`promotion-criteria.md`](promotion-criteria.md).
 
 ## Reading map
 

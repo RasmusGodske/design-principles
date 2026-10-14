@@ -37,15 +37,15 @@ Only things on the public surface are importable from outside the module. Placin
 - **Contents:** Immutable value objects representing requests, responses, configuration, or domain values that outside callers consume or construct.
 - **Imported by:** Any module.
 - **When to add:** When another module genuinely needs one of this module's data classes. Moving a class from internal `data/` to `public/data/` is the moment a shape becomes contract — treat it as a reviewed decision.
-- **Structure — three homogeneous buckets** (applies to the internal `data/` directory too; keep it from becoming a flat mix of domain values and view payloads):
+- **Structure — three homogeneous buckets** (applies to the internal `data/` directory too; keep it from becoming a flat mix of domain values, payloads and views):
 
   | Bucket | Holds | Suffix |
   |---|---|---|
   | root | **Domain data classes** — the entity data classes used by services and logic (each a Config or a Record; see [`config-and-record`](../config-and-record/README.md)). | `*Data` |
-  | `data/entrypoints/{Handler}/` | **Handler I/O** owned by one entry point — the per-action payload, request data classes, and any child data classes private to that handler. Mirrors the handler's own location. Handler I/O is internal by nature — it lives under the internal `data/`, never `public/data/`. | `*PayloadData` for the per-action payload |
-  | `data/views/` | **Shared presentational data classes** — resolved/projected shapes reused by ≥2 handlers (e.g. a domain data class enriched with display-resolved fields). Internal unless another module renders them. | `*ViewData` |
+  | `data/payloads/` | **Action payloads** — the input an action accepts, owned by the action (the service method that performs it), not by the entry point that happens to receive it. A form, an API call and an assistant tool performing the same action send the same payload, and the entry point passes it on unchanged (see [`acting-on-behalf`](../acting-on-behalf/README.md)). Published when the action is. | `*ActionPayloadData` |
+  | `data/views/` | **Views** — what a [data view](../data-view/README.md) returns: one presentation-agnostic shape per view (the list, the overview, a section), named for what the view is, not where it is shown. Published when the data view is. | `*ViewData` |
 
-  The placement rule, in one line: *owned by one handler → mirror the handler (internal); shared & presentational → `data/views/`; pure domain value → the root — `public/data/` if published, `data/` if internal.* A suffix signals the layer without reading the path; the suffixes above are the neutral illustration and your binding spells them (`*Data` / `*PayloadData` / `*ViewData` in one stack, `*Dto` / `*RequestDto` / `*ViewDto` in another). Don't over-structure a module with three data classes — promote to the sub-buckets when the flat directory starts mixing the kinds.
+  The placement rule, in one line: *an action's input → `data/payloads/`; a data view's output → `data/views/`; a pure domain value → the root — each under `public/data/` if published, `data/` if internal.* Entry points own no data classes: they pass payloads to actions and present views. A suffix signals the layer without reading the path; the suffixes above are the neutral illustration and your binding spells them (`*Data` / `*ActionPayloadData` / `*ViewData` in one stack, `*Dto` / `*RequestDto` / `*ViewDto` in another). Don't over-structure a module with three data classes — promote to the sub-buckets when the flat directory starts mixing the kinds.
 
 ### `public/enums/`
 
@@ -111,7 +111,7 @@ Outside callers may not import directly. Routing here goes through the module's 
 ### `modules/`
 
 - **Purpose:** Container for sub-modules.
-- **Contents:** Sub-module directories, each following the same template recursively.
+- **Contents:** Sub-module directories, each a slice of the domain (never a page, screen or view of it), each following the same template recursively.
 - **Imported by:** Outside callers may import a sub-module's public surface directly — sub-modules are public peers by default.
 - **When to add:** When a piece of the module has enough internal complexity to justify hiding behind its own interface. See [`promotion-criteria.md`](promotion-criteria.md).
 

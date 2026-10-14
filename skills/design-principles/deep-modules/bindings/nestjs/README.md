@@ -56,7 +56,7 @@ Per [`naming-and-placement.md`](../../naming-and-placement.md), only a module's 
 
 Controllers are **not** faces: a module may have none or several, and the descriptor registers a list. Nest's file idiom does name a module's primary controller after it (`billing.controller.ts` → `BillingController`); that is permitted as idiom, not required by the rule. Any further controller is named for its resource (`InvoiceController`, `RefundController`), never for the module. Everything else is named for what it is: `InvoiceCalculationService`, `InvoiceAccessGuard`, `ExpiredDraftSweeperService`, `ChargeResultDto`, `TransportError`.
 
-Data-class layer suffixes in this binding: `*Dto` for domain values and published shapes, `Create*Dto` / `*QueryDto` for one handler's payload, `*ViewDto` for shared presentational projections.
+Data-class layer suffixes in this binding: `*Dto` for domain values and published shapes, `Create*Dto` / `*QueryDto` for an action's payload, `*ViewDto` for what a data view returns.
 
 ## Wiring: the module descriptor
 

@@ -88,10 +88,10 @@ If you find yourself frequently rejecting alternatives that turned out to be obv
 Within a module's `data/`, a data class belongs to one of three layers, and the name should say which:
 
 - a **domain** value — an entity value used by services and logic, at `data/` root;
-- an **entry point's per-action payload**, under `data/entrypoints/{Handler}/`;
-- a **shared presentational** projection reused across handlers, under `data/views/`.
+- an **action's payload**, the input an action accepts, under `data/payloads/`;
+- a **view**, what a data view returns, under `data/views/`.
 
-The principle asks for one recognisable suffix per layer so the name alone tells you what it is. The *spelling* of those suffixes is a stack habit and lives in the binding (one stack may write `*Data` / `*PayloadData` / `*ViewData`, another `*Dto` / `*RequestDto` / `*ViewDto`). This is the layer axis, orthogonal to the module-prefix rule above: `InvoiceData`, not `BillingInvoiceData`, in either case. See [`directories.md`](directories.md#publicdata) for the placement rule.
+The principle asks for one recognisable suffix per layer so the name alone tells you what it is. The *spelling* of those suffixes is a stack habit and lives in the binding (one stack may write `*Data` / `*ActionPayloadData` / `*ViewData`, another `*Dto` / `*RequestDto` / `*ViewDto`). This is the layer axis, orthogonal to the module-prefix rule above: `InvoiceData`, not `BillingInvoiceData`, in either case. See [`directories.md`](directories.md#publicdata) for the placement rule.
 
 ## See also
 

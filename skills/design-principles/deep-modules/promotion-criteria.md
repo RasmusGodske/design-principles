@@ -37,6 +37,13 @@ This applies recursively — to modules, sub-modules, contracts, framework direc
 
 **Do not promote when:** the candidate is one or two services. That is shallow ceremony — keep it flat.
 
+**A sub-module is a slice of the domain, never a way of presenting it.** Its name is something the domain *has* (invoicing, calculation, invitations), not a place it is shown. A page, a screen, a tab, a report layout or a view of the module's data presents the parent's entities, so it belongs to the parent, however many classes it takes: its view shapes and the services that build them sit beside the parent's other public services. Two reasons:
+
+- **A presentation owns nothing.** Ask what the sub-module would own. "The customer page" owns no entity and no rule; the customer module owns the customer, and the page only shows it.
+- **Presentations multiply.** The same overview is shown on a page, returned by an API, handed to an assistant. A module named after one of them reads as if the others belong somewhere else.
+
+> Counter-example: a customer page with five tabs gets a `modules/CustomerPage/` holding the five views and their controller. Inline it: the views go in the customer module's public services and public data, the controller in its entry points. The parent gets five more classes and no new concept, so it is not worse to navigate; the sub-module was a folder named after a screen.
+
 > Example: `modules/Billing/` is growing. Calculation logic has its own data structures, services, and a state machine. Invoicing has its own template engine and a separate set of services. Both qualify — they get promoted to `modules/Calculation/` and `modules/Invoicing/`.
 >
 > Counter-example: A small "send a payment reminder" feature is just one service. It stays as `public/services/PaymentReminderService`. Wrapping it in `modules/Reminders/` would be ceremony with no payoff.

@@ -23,7 +23,7 @@ The [Deep Modules](../../README.md) convention names **roles**. This binding say
 | Wiring | `{Domain}ServiceProvider.php` at the module root (see below) |
 | Sub-modules | `Modules/{SubModule}/` — path reads `app/Modules/Billing/Modules/Calculation/` |
 | Variants | `Framework/` + one directory per variant |
-| Data-class layers | `Data/Http/Controllers/{Controller}/*PropsData` (one controller's payload — the principle's `*PayloadData`, named after the page props it feeds), `Data/Views/*ViewData` (shared presentational), `*Data` at root (domain) — typically Spatie Laravel Data classes |
+| Data-class layers | `Data/Payloads/*ActionPayloadData` (an action's input), `Data/Views/*ViewData` (what a data view returns; replaces the older controller-owned `Data/Http/Controllers/{Controller}/*PropsData`), `*Data` at root (domain) — typically Spatie Laravel Data classes |
 | Junk drawers | `Helpers/`, `Util/`, `Common/`, `Shared/`, `Misc/` forbidden anywhere in `app/` |
 
 Directory names are PascalCase to match Laravel's `app/` conventions.
