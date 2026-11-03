@@ -16,6 +16,7 @@ The principles are **lenses**, not procedures: each one is a way of looking at a
 | Acting on Behalf | Every request an actor makes passes one thin on-behalf service that decides what they may see and do. |
 | Data View | Every view of the data is built by one data view from on-behalf services' answers; pages, APIs and tools only present it. |
 | Explicit Names | A variable is named after its declared type and a method starts with its action, so one line read on its own says what happens. |
+| Concept Families | Every new way of doing something starts a family or joins one; name the family and its members, and write them down together. |
 | Safe Deletion | Delete only when nothing depends on it; refuse while something live uses it, archive when only history refers to it. |
 | Retire, Don't Erase | Don't drop columns or tables in a migration — retire them; back up data before changing it. Always keep a way back. |
 | Testing | A test's location says what it covers; its cost is declared inside it. |
