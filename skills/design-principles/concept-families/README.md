@@ -32,6 +32,8 @@ Now the calendar export has an obvious place: a fourth row that works like the o
 
 People understand a system in groups. "Three ways to get data out" fits in a head; fifteen unrelated feature names do not. A named family gives developers, reviewers and the people talking to customers the same words.
 
+It tells you when to stop looking. Someone searching the documentation for a PDF export who finds an "Export formats" section without it knows at once that there is none. Without the family, they would have to read everything to be sure. Code works the same way: a complete list of members turns "not there" into an answer, so you can stop searching and decide to build it. This only works if the list is complete, which is why rules 5 and 6 ask for every member, outliers included.
+
 It also improves the code. To place a new way in a family, you have to look at the existing ways and say how yours differs. That is when a one-off becomes visible: it either joins and follows the family's shape, or it is genuinely new and gets its own name.
 
 ## The rules
