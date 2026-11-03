@@ -57,11 +57,16 @@ If something seems to fit two families, two questions are mixed. A report that "
 ### 3. Name members with the family's noun
 
 ```text
-✗  csv, pdf, push
-✓  CSV export, PDF export, push notification
+Export formats
+  ✗  csv, pdf, json
+  ✓  CSV export, PDF export, JSON export
+
+Notification channels
+  ✗  email, push
+  ✓  email notification, push notification
 ```
 
-The name alone should tell you which family it belongs to. Use the words the business already uses, and choose names most people would agree with.
+On its own, "push" could mean anything; "push notification" says it is one of the notification channels. The name alone should tell you which family it belongs to. Use the words the business already uses, and choose names most people would agree with.
 
 ### 4. A family of one is a name and a table
 
