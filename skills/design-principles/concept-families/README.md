@@ -8,9 +8,15 @@ description: 'Why alternative ways of doing the same job are grouped into a name
 
 > **Every new way of doing something starts a family or joins one. Know which, and write the family down: its name, each member's name, and what each member does that the others don't.**
 
-A product exports reports. One developer adds a spreadsheet download. Later another adds a print view, and a third an API dump. Each built theirs without knowing about the others, so each has its own name, button and settings. A customer asks for a PDF, and support has to discover that "print view" is the answer. Asked for a calendar export, the next developer finds no pattern and builds a fourth one-off.
+Imagine a product where reports can be exported. Over a year, three developers each add an export, without knowing about the others:
 
-Name the family the first time, and the story changes:
+- a spreadsheet download, called "Download"
+- a printable version, called "Print view"
+- a data feed for other systems, called "API dump"
+
+Each has its own name, its own button and its own settings. When a customer asks "can I get a PDF?", nobody connects that to "Print view". When a fourth developer is asked for a calendar export, there is no pattern to follow, so they build a fourth one-off.
+
+All three are the same kind of thing: ways to export a report. Name that once and write it down:
 
 ```text
 Export formats
@@ -20,7 +26,7 @@ Export formats
 | JSON export | the full report as data     | other systems      |
 ```
 
-Each new format becomes a row, not a one-off. The customer, support and the developers all say "PDF export".
+Now the calendar export has an obvious place: a fourth row that works like the other three. And when a customer asks for a PDF, everyone, from support to the developers, knows it as "PDF export".
 
 ## Why
 
