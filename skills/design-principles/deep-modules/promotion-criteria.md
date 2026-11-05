@@ -42,6 +42,12 @@ This applies recursively — to modules, sub-modules, contracts, framework direc
 - **A presentation owns nothing.** Ask what the sub-module would own. "The customer page" owns no entity and no rule; the customer module owns the customer, and the page only shows it.
 - **Presentations multiply.** The same overview is shown on a page, returned by an API, handed to an assistant. A module named after one of them reads as if the others belong somewhere else.
 
+A list, a search, a query endpoint or a picker's data is a presentation too, however much logic it holds. Write down what the candidate owns before creating it. If the sentence is "it owns only the list" (or "only the page", "only the export"), the sub-module fails this test: put its classes in the module that owns the entity being listed.
+
+**When no module owns the entity yet**, that is the gap to fix: the first service the entity needs founds its owning module, named after the entity. Never name the new module after that first service or its class prefix (an `InvoiceListQueryService` does not make an `InvoiceList` module). If the domain is itself named after the entity, the domain owns it; see the parent-level section below.
+
+> Counter-example: an invoice list query (search, sort and paging over the invoices a person may see) goes into `modules/InvoiceList/`, whose README says "nothing owns the invoice itself yet; this module owns only the list". That sentence is the failed test. The list belongs to the invoice's owner, as a payment list belongs to the payment's owner; if no module owns invoices, this is the moment to found the one that does.
+
 > Counter-example: a customer page with five tabs gets a `modules/CustomerPage/` holding the five views and their controller. Inline it: the views go in the customer module's public services and public data, the controller in its entry points. The parent gets five more classes and no new concept, so it is not worse to navigate; the sub-module was a folder named after a screen.
 
 > Example: `modules/Billing/` is growing. Calculation logic has its own data structures, services, and a state machine. Invoicing has its own template engine and a separate set of services. Both qualify — they get promoted to `modules/Calculation/` and `modules/Invoicing/`.
@@ -90,6 +96,8 @@ See the [Wiring section of `directories.md`](directories.md#wiring) for the full
 - Transactions spanning multiple sub-modules
 - Invariants only the parent can enforce
 - A single point that enforces ordering between sub-modules
+
+Also **when the parent is named after an entity and owns it**: an `Order` domain owns the order, so the order's own services (its list query, its on-behalf service) sit in `modules/Order/public/services/`, beside the sub-modules for what an order has (its lines, its shipments, its refunds). This is not orchestration and needs none; it is the parent being a leaf for its own entity.
 
 **Do not promote when:** the parent's only job would be to delegate. A facade with no logic is shallow ceremony.
 

@@ -25,7 +25,7 @@ For the rules about when *optional* directories earn their place, see [`promotio
 - **Purpose:** The public entry surface for the module. Mutations and orchestrating queries live here.
 - **Contents:** Concrete `*Service` classes that outside callers invoke.
 - **Imported by:** Any module.
-- **Required:** Yes for **leaf modules** (the common case). Not present in **container modules** (which contain only `README.md` + `modules/`) or **contract modules** (which contain only `README.md` + `public/contracts/`). See the three module shapes in [`README.md`](README.md#module-shapes).
+- **Required:** Yes for **leaf modules** (the common case). Not present in **container modules** (which contain only `README.md` + `modules/`, unless the parent owns the entity it is named after; see [`promotion-criteria.md`](promotion-criteria.md#parent-level-publicservices-when-sub-modules-exist)) or **contract modules** (which contain only `README.md` + `public/contracts/`). See the three module shapes in [`README.md`](README.md#module-shapes).
 
 ## Published — under `public/`, importable from any module
 
@@ -111,7 +111,7 @@ Outside callers may not import directly. Routing here goes through the module's 
 ### `modules/`
 
 - **Purpose:** Container for sub-modules.
-- **Contents:** Sub-module directories, each a slice of the domain (never a page, screen or view of it), each following the same template recursively.
+- **Contents:** Sub-module directories, each a slice of the domain that owns a record or a rule (never a page, screen, view, list or query of it), each following the same template recursively.
 - **Imported by:** Outside callers may import a sub-module's public surface directly — sub-modules are public peers by default.
 - **When to add:** When a piece of the module has enough internal complexity to justify hiding behind its own interface. See [`promotion-criteria.md`](promotion-criteria.md).
 

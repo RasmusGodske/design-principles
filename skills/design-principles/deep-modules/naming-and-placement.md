@@ -75,6 +75,7 @@ The first instinct was driven by the consumer (Notifications) because that's whe
 | `DraftIssueCode` (module prefix on a value class) | Encodes location into the name | `IssueCode` |
 | `PaymentReceivedNotificationData` (consumer suffix on a producer's value) | Names the consumer instead of what the class IS | `PaymentReceivedData` |
 | `PriceHelper`, `BillingManager`, `InvoiceUtil` | "Helper", "Manager", "Util" describe nothing | Rename to describe what the class DOES (`PriceRounder`, `InvoiceDispatcher`) |
+| `modules/InvoiceList/` for an `InvoiceListQueryService` | The module was named after its first class, so it owns the list, not the invoice | Put the class in the module that owns the invoice; if none exists, found one named after the invoice ([`promotion-criteria.md`](promotion-criteria.md#modules--sub-modules)) |
 | `PaymentService` renamed to `BillingService` "because it is public" | Being published does not make a class the module's face; only the primary front door is | keep `PaymentService` |
 
 ## Why the rule lives in code, not memory
