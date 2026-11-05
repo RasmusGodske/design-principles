@@ -72,7 +72,7 @@ This is a deliberate boundary. Whatever type-organized layout pre-dates the conv
 A module takes one of three shapes, distinguished by what it contains at the parent level. Most modules are leaf modules; container and contract modules are deliberate choices when no leaf shape describes the module's intent honestly.
 
 - **Leaf module** — has its own services. Does work. The default and most common shape (~95% of cases).
-- **Container module** — exists purely to organize sub-modules. The parent has no public services of its own; sub-modules are public peers. Use when a parent groups related sub-modules but has no orchestration of its own to host.
+- **Container module** — exists purely to organize sub-modules. The parent has no public services of its own; sub-modules are public peers. Use when a parent groups related sub-modules but has no orchestration of its own to host. A parent that is named after an entity (an `Order` domain and the order) owns that entity itself, in its own public services, beside its sub-modules; it is then a leaf and a container at once (see [`promotion-criteria.md`](promotion-criteria.md#parent-level-publicservices-when-sub-modules-exist)).
 - **Contract module** — publishes a shared abstraction (one or more interfaces). Has no services or models — implementers live in other independent modules. Use when multiple independent modules need the same contract and no single one is its natural owner.
 
 The three minimums:
@@ -181,7 +181,7 @@ Variants and sub-modules compose. A variant can itself contain `modules/` for it
 4. **Mutations go through public services.** HTTP handlers, CLI commands, tool endpoints, listeners are thin entry points that delegate. State changes never originate in an entry point.
 5. **No junk drawers.** `helpers/`, `util/`, `common/`, `shared/`, `misc/` are forbidden anywhere in the source tree.
 6. **Naming.** Names describe what a class IS, not where it lives. Only a module's faces — its primary public service and the pieces the framework registers per module — carry the module's name; everything it contains, published or not, is named for what it is. Before placing a new class, name 1–2 alternative homes and pick the strongest.
-7. **Optional elements earned.** Framework/variant splits, sub-modules, contracts, wiring files, internal services are added only when they earn their place. A sub-module is a slice of the domain, never a way of presenting it: no sub-module for a page, a screen, a tab or a view. See [`promotion-criteria.md`](promotion-criteria.md).
+7. **Optional elements earned.** Framework/variant splits, sub-modules, contracts, wiring files, internal services are added only when they earn their place. A sub-module is a slice of the domain, never a way of presenting it: no sub-module for a page, a screen, a tab, a view, a list, a query or a picker. It owns a record or a rule; if the honest answer to "what does it own?" is "only the list" (or the page, the export), it is not a sub-module. An entity with no owning module gets one, named after the entity, never after the first service it needs. See [`promotion-criteria.md`](promotion-criteria.md).
 
 ## Reading map
 
