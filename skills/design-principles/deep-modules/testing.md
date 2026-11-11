@@ -53,21 +53,26 @@ Exceptions:
 
 This is one of the practical wins of deep modules: there are far fewer interfaces to mock, and the boundaries are clear about which ones must remain real.
 
-## Contract tests for variant frameworks
+## Contract tests for families
 
-When a module has published contracts and multiple implementations (Stripe and Paypal both implement `PaymentGateway`), write a **shared contract test** — the same behavioral suite run against each implementation:
+When a family has a published contract and several members (Stripe and Paypal both implement `PaymentGateway`), write a **shared contract test** — one behavioral suite that every member must pass. The suite lives with the family module, because it is code for all members; it names no member. Each member runs it against itself from its own tests:
 
 ```text
-// tests/modules/payment-gateways/framework/PaymentGatewayContractTest
-
-for each gateway in [StripeGateway, PaypalGateway]:
-    test "it processes a charge" (gateway):
+// tests/modules/payment/modules/payment-gateway/PaymentGatewayContractSuite
+suite PaymentGatewayContractSuite(gateway):
+    test "it processes a charge":
         // behavioral test against the contract's promises
+
+// tests/modules/payment/modules/payment-gateway/modules/stripe/StripePaymentGatewayTest
+run PaymentGatewayContractSuite(StripePaymentGateway)
+// ...plus the tests only this member needs
 ```
 
-Most test runners have a native way to parameterize one test over several subjects; use it rather than copying the suite per implementation.
+Most test runners have a native way to share one suite between several subjects; use it rather than copying the suite per member. Do not list the members in the family's test: a member brings its own tests, so that deleting a member deletes its tests with it and adding one touches nothing above it.
 
-Each implementation must pass the same promises. This is where published contracts actually earn their ceremony — without contract tests, the interface is a documentation gesture; with them, it is a tested invariant.
+Each member must pass the same promises. This is where published contracts actually earn their ceremony — without contract tests, the interface is a documentation gesture; with them, it is a tested invariant.
+
+> **Changed 11 November 2026.** The contract suite was a loop over the implementations in the framework's test directory; it is now a suite held by the family module that each member runs against itself. Reason: nothing above a member may know that the member exists, and a member brings its own tests.
 
 ## When direct testing of internals IS warranted
 

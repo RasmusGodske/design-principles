@@ -30,7 +30,8 @@ This is a common failure mode: validation primitives end up locked into the wron
 
    These classes cannot move to another module, because the module cannot exist toward that outsider without them. Naming them after the module is accurate, not gravity.
 4. **Everything else is named for what it is — published or not.** Being on the public surface is *not* the test. A published `InvoiceData` is still `InvoiceData`, and a public `RefundService` is still `RefundService`: they are things Billing contains, and either could in principle live elsewhere. Their names keep that question open.
-5. **Reserve module prefixes for genuine disambiguation** beyond rule 3. If two `IssueCode` enums in different modules coexist in the same caller's scope, a prefix may be needed — but this is rare. Usually one of them belongs elsewhere.
+5. **A member of a family carries the family's noun in its class and not in its directory.** The member's directory is `Stripe/` under `modules/PaymentGateway/modules/`; its class is `StripePaymentGateway`. The path already says the family, so the directory does not repeat it; the class is read on its own in other files, so it does. This is the family's naming rule from [`concept-families`](../concept-families/README.md) (rule 3) meeting this one: the class that implements the family's contract is the member's face.
+6. **Reserve module prefixes for genuine disambiguation** beyond rule 3. If two `IssueCode` enums in different modules coexist in the same caller's scope, a prefix may be needed — but this is rare. Usually one of them belongs elsewhere.
 
 ### The test in one line
 
@@ -45,6 +46,7 @@ The rule is the same everywhere; only the number of faces changes with the stack
 | the primary public service (`BillingService`) | yes | the module's face toward other modules |
 | the module descriptor / wiring file, where the stack has one | yes | the module's face toward the container |
 | a controller / HTTP handler | no | a module may have none or several; a stack's file idiom may name the primary one after the module, which is idiom, not a face |
+| a family member's implementation of the contract (`StripePaymentGateway` in `Stripe/`) | yes, plus the family's noun | the member's face toward the family and its callers |
 | a secondary service (`RefundService`) | no | something the module contains, named for what it does |
 | a value or enum (`IssueCode`) | no | could belong elsewhere; the name keeps that open |
 | a data class (`InvoiceData`) | no | published or not, it is a thing, not the module |
@@ -93,6 +95,8 @@ Within a module's `data/`, a data class belongs to one of three layers, and the 
 - a **view**, what a data view returns, under `data/views/`.
 
 The principle asks for one recognisable suffix per layer so the name alone tells you what it is. The *spelling* of those suffixes is a stack habit and lives in the binding (one stack may write `*Data` / `*ActionPayloadData` / `*ViewData`, another `*Dto` / `*RequestDto` / `*ViewDto`). This is the layer axis, orthogonal to the module-prefix rule above: `InvoiceData`, not `BillingInvoiceData`, in either case. See [`directories.md`](directories.md#publicdata) for the placement rule.
+
+> **Changed 11 November 2026.** Rule 5 (naming a family's member) was added and the old rule 5 became rule 6. Reason: a family's members are now always modules under the family module, and their directory and class names follow one pattern, so a new member is named without a decision.
 
 ## See also
 

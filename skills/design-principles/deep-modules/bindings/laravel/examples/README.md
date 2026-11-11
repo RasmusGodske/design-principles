@@ -14,8 +14,10 @@ Read the neutral example first for the reasoning; read the one here when you wan
 |---|---|---|
 | [`flat-domain.md`](flat-domain.md) | Leaf module, no decomposition | [`flat-domain.md`](../../../examples/flat-domain.md) |
 | [`domain-with-submodules.md`](domain-with-submodules.md) | Leaf module decomposed into sub-modules with parent orchestration | [`domain-with-submodules.md`](../../../examples/domain-with-submodules.md) |
-| [`variant-framework.md`](variant-framework.md) | `Framework/` + multiple variants | [`variant-framework.md`](../../../examples/variant-framework.md) |
-| [`full-pattern.md`](full-pattern.md) | Both variants AND sub-modules within a variant | [`full-pattern.md`](../../../examples/full-pattern.md) |
+| [`family.md`](family.md) | A family module with its member modules | [`family.md`](../../../examples/family.md) |
+| [`full-pattern.md`](full-pattern.md) | A family whose member has sub-modules of its own | [`full-pattern.md`](../../../examples/full-pattern.md) |
 | [`contract-module.md`](contract-module.md) | Contract module — publishes a shared abstraction | [`contract-module.md`](../../../examples/contract-module.md) |
 
 The examples are independent — they don't need to be read in order.
+
+> **Changed 11 November 2026.** The "variant framework" example is now the family example, `family.md`. Reason: the `Framework/` plus variant-directories layout is retired; a family is a module under `Modules/` and its members are modules under it.

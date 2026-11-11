@@ -30,7 +30,8 @@ Most placements are mechanical. Use this table first; only fall through to the q
 | A CLI command | `{Module}/entrypoints/cli/` |
 | A queueable job | `{Module}/entrypoints/jobs/` |
 | An event listener | `{Module}/entrypoints/listeners/` (in the *consumer* module) |
-| An interface for ≥2 implementations | `{Module}/public/contracts/` (or `framework/public/contracts/`) |
+| An interface for ≥2 implementations | `{Module}/public/contracts/` (for a family: the family module's `public/contracts/`) |
+| A new kind of something that already has kinds (a member of a family) | A new member module: `{Owner}/modules/{Family}/modules/{Member}/`, copied from a sibling |
 
 ## Step-by-step questions
 
@@ -71,9 +72,20 @@ Entry points are always thin — they delegate every mutation to `public/service
 
 - **One implementation today** → don't extract. The service class is the contract.
 - **≥2 implementations today** → `public/contracts/`.
-- **Variant framework with implementations in variant directories** → `framework/public/contracts/`.
+- **The contract of a family** → the family module's `public/contracts/`. Each implementation is a member module under the family module's `modules/`.
 
-### 6. If the module doesn't exist yet?
+### 6. If it's a new kind of something that already has kinds?
+
+That is a member of a family. Ask in order:
+
+- **Does the family module exist?** Then the member is a new module under a `modules/{Family}/modules/`, made by copying a sibling, whatever its size. Never a loose class beside the others, and never a directory at a module's root.
+- **Which `modules/{Family}/`?** The one in the module that owns what the member knows. A member that knows only the family's subject goes under the family's home. A member that knows another module's subject goes in that module, under a module of the same family name.
+- **Is this the second kind, and the family has no module yet?** This is the moment the family is promoted: create the family module, and move the first kind into it as a member module too. See [`promotion-criteria.md`](promotion-criteria.md#family--kinds-of-the-same-thing).
+- **Is it the first and only kind?** Not a family module yet: place the class by the questions above and write the family's name and one-row table down.
+
+Everything the member needs (its tests, its fakes, its entry points) goes inside the member, even when a sibling has a similar piece.
+
+### 7. If the module doesn't exist yet?
 
 Create it. Start flat — a `README.md` and the new class, nothing else. Let the module accrue directories as code is added; never scaffold empty directories upfront.
 
@@ -107,9 +119,15 @@ The first home that comes to mind is often shaped by the class's name. Listing a
 >
 > Lookup: a listener → `{Module}/entrypoints/listeners/`. Owner: this lives with the *consumer* (the module that reacts), not the producer. Place: `modules/Analytics/entrypoints/listeners/PaymentReceivedListener`.
 
+> **Adding a bank-transfer payment gateway** — a third gateway beside two existing ones; it is a single class.
+>
+> Lookup: a member of a family. The family module exists: `modules/Payment/modules/PaymentGateway/`. A gateway knows only about taking payments, so it lives under the family's home. Place: `modules/Payment/modules/PaymentGateway/modules/BankTransfer/public/services/BankTransferPaymentGateway`, with a README, copied from a sibling. One class is not a reason to put it anywhere else.
+
 > **Adding `RefundService`** — a service that issues refunds.
 >
 > Lookup: a service. Owner: refunds are a Billing operation. Public or internal? Refunds are user-facing — outsiders (handlers, commands) trigger them. Public. Place: `modules/Billing/public/services/RefundService`. (Note: `RefundService`, not `BillingRefundService` — the namespace already encodes the module.)
+
+> **Changed 11 November 2026.** The variant branch (`framework/public/contracts/`) became the family branch, and question 6 was added. Reason: every child module now lives under `modules/`, a family is a module, and a member is always a module, so placing a new kind is a lookup rather than a judgment about its size.
 
 ## See also
 

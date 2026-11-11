@@ -83,13 +83,15 @@ Container:  modules/{Domain}/README.md + modules/{SubModule}/...
 Contract:   modules/{Domain}/README.md + public/contracts/{Contract}
 ```
 
-Sections below cover the leaf shape (the default) in detail, with sub-modules and variants for decomposition.
+A **family module** (see [Families](#families--for-kinds-of-the-same-thing)) is not a fourth shape: it publishes the family's contract, usually has services for the code its members share, and holds its members as sub-modules.
+
+Sections below cover the leaf shape (the default) in detail, with sub-modules and families for decomposition.
 
 ### Principles
 
 1. **Deep modules over shallow ones.** A module hides a lot of behaviour behind a small interface. If deleting the module wouldn't make N callers more complex, the module is a pass-through and shouldn't exist.
 2. **Public surface is explicit.** Outside callers may only import a module's public surface — publication is an explicit act, never a side effect of directory kind. Where the language has a visibility mechanism, use it; where it doesn't, a directory plays that role. See [`public-surface.md`](public-surface.md).
-3. **Earned, not speculative.** Every optional structural element — internal services, sub-modules, variant frameworks, contracts, wiring files — is added only when it earns its place. See [`promotion-criteria.md`](promotion-criteria.md).
+3. **Earned, not speculative.** Every optional structural element — internal services, sub-modules, families, contracts, wiring files — is added only when it earns its place. See [`promotion-criteria.md`](promotion-criteria.md).
 4. **Mutations go through public services.** Entry points (HTTP handlers, CLI commands, listeners, jobs) are thin and delegate. State changes never originate in an entry point. An entry point that serves an actor (a person, an API client, an audited job) delegates to the module's on-behalf services; see [acting on behalf](../acting-on-behalf/README.md).
 5. **Names describe what a thing is, not where it lives.** The module name belongs in the namespace / package path. A class carries the module's name only when it is the module's face toward an outsider — its primary public service, or the pieces the framework registers per module (the binding lists them). See [`naming-and-placement.md`](naming-and-placement.md).
 
@@ -128,7 +130,7 @@ Add directories as the module genuinely needs them. A small module might be a RE
 
 ### Decomposing a module
 
-Modules grow. The convention gives two structural tools for breaking a module into smaller pieces, and they're independent — a module can use neither, either, or both.
+Modules grow. A module is broken into smaller pieces in one place only: **every child module lives under `modules/`**, and a module's root holds nothing but its `README.md`, its wiring file and the reserved role directories (`public/`, `services/`, `models/`, `data/`, `enums/`, `entrypoints/`, `modules/`, in the binding's spelling). A directory with a free name at a module's root is a mistake. A child is one of two things: a **sub-module**, a slice of the parent, or a **family module**, which holds the kinds of one thing. A module can have neither, either, or several of both.
 
 #### Sub-modules — for internal complexity
 
@@ -153,25 +155,58 @@ modules/Billing/
 
 Sub-modules are **public peers by default** — outside callers may import a sub-module's public surface directly. The parent gets its own public services only when it has cross-sub-module orchestration to host (transactions spanning sub-modules, invariants only the parent can enforce, ordering between sub-modules). A parent that only delegates is shallow ceremony.
 
-#### Variants — for multiple kinds of the same thing
+#### Families — for kinds of the same thing
 
-When a module exists in several kinds or versions that must evolve independently (payment providers, export formats, engine versions), split it into a shared **framework** and one directory per **variant**:
+When something exists in several kinds that answer the same question and that someone chooses between (payment gateways, report formats, engine versions), the kinds are a **family** and each kind is a **member** (the words are those of [`concept-families`](../concept-families/README.md)). In the file tree a family is a module, and so is every member:
 
 ```
-modules/PaymentGateways/
+modules/Payment/
 ├── README.md
-├── framework/                   ← shared across variants
-│   ├── public/contracts/        ← the interface every variant implements
-│   └── public/services/         ← code that operates on any variant
-├── Stripe/                      ← variant — full module template
-└── Paypal/                      ← variant — full module template
+├── public/services/                 ← the payment's own services
+└── modules/
+    ├── PaymentGateway/              ← the family: contract, shared code, the table in its README
+    │   ├── README.md
+    │   ├── public/contracts/        ← the interface every member implements
+    │   ├── public/services/         ← code that works on any member
+    │   └── modules/
+    │       ├── Stripe/              ← member — a module
+    │       ├── Paypal/              ← member — a module
+    │       └── BankTransfer/        ← one class today; a module all the same
+    └── Refund/                      ← not a gateway: another slice of payment
 ```
 
-*Promote when you can name the variant axis cleanly and the second variant exists.* If you can't name the axis, you don't qualify. (The framework/variant split is its own principle — see [`framework-and-implementation`](../framework-and-implementation/README.md) for what may live in the framework.)
+The seven family rules:
 
-#### Combining both
+1. **A module's root holds only reserved directories; every child module lives under `modules/`.** No directory at the root is shared by all members, and no member sits at the root. The tree then says by itself which directories are structure and which are children, a module has one place for its children, and it can hold as many families and slices as it has.
+2. **A family is a module named after the family, in the singular** (`PaymentGateway`, `ReportFormat`), like every other module. It holds the contract every member implements, the code all members share, and the family's table in its README ([`concept-families`](../concept-families/README.md), rule 8).
+3. **A member is always a module**, under the family module's `modules/`. The directory is named without the family's noun (`Stripe/`, not `StripePaymentGateway/`) and the member's class with it (`StripePaymentGateway`). A member of one class is still a module. **The deletion test is applied to the family as a whole, never to one member**: callers learn only the family's contract, so a member adds nothing to what they must know, whatever its size. The point is consistency: a rule with no exceptions needs no judgment.
+4. **All members of a family have the same shape.** No family mixes loose classes and modules, and no member is promoted from one to the other later. A new member is made by copying a sibling.
+5. **A member lives where what it knows lives.** When the members know only the family's own subject, they sit under the family module, as the gateways above do. When a member knows another module's subject, that module holds it, under a module of the same family name:
 
-Variants and sub-modules compose. A variant can itself contain `modules/` for its own internal decomposition. The recursion has no fixed depth limit, but each level of nesting must earn its place by the same promotion criteria. See [`promotion-criteria.md`](promotion-criteria.md).
+   ```
+   modules/Audit/                               ← the family's home
+   ├── public/contracts/AuditCheck              ← the contract
+   └── public/services/AuditCheckRegistry       ← finds the members; names none
+
+   modules/Billing/modules/AuditCheck/          ← Billing's members
+   └── modules/
+       ├── UnpaidInvoice/
+       └── DuplicateCharge/
+
+   modules/Inventory/modules/AuditCheck/        ← Inventory's members
+   └── modules/
+       └── NegativeStock/
+   ```
+
+   The path pattern `*/modules/{Family}/modules/*` then finds every member in the codebase. The family's home keeps the contract, the registry and the table, and knows no member.
+6. **Depth is not a cost to limit.** A long path that shows a hierarchy and groups related modules is a free summary, read without opening a file. Limits on nesting were made for people browsing a file tree; a reader that goes to a path directly loses nothing to depth. What must hold at every level is the deletion test on the thing that level owns.
+7. **A member brings everything it needs, and nothing above it knows a member exists.** Its tests, its fakes and fixtures, its entry points and its pages live inside the member, even when two members end up with similar ones: each payment gateway carries its own sandbox stub of its provider, rather than the family holding one stub that asks each member how to answer. The only things members share are the family's contract and the code the family module holds for all of them. Sharing a piece "because two members have one like it" puts knowledge of the members above them. The family reaches its members through the contract alone: a member makes itself known (its own wiring, or the stack's discovery), and no code above it lists the members. The test: a member can be deleted, or copied into a new sibling, with nothing left behind and nothing missing.
+
+*Promote when the second member exists and you can name the family cleanly.* A family of one is a name and a one-row table, not a family module. What may live in the family module rather than in a member is its own principle: see [`framework-and-implementation`](../framework-and-implementation/README.md).
+
+Slices and families compose. A member is a module, so it can hold sub-modules of its own when its complexity earns them; a module can hold two families side by side; a family module sits beside the parent's ordinary slices. See [`promotion-criteria.md`](promotion-criteria.md).
+
+> **Changed 11 November 2026.** This section replaces "Variants" and "Combining both", which put a `framework/` directory and one directory per variant at a module's root. That layout is retired: it put free names among the reserved directories, so nothing in the tree said which were members; it gave a module two places for children; it had room for one family per module; and it had no shape for a family of small members, so those ended up as an enumeration with a method per question. What it got right is kept: a family needs a second member and a clean name, has a shared contract, and keeps shared code apart from the members.
 
 ### The seven rules
 
@@ -181,7 +216,7 @@ Variants and sub-modules compose. A variant can itself contain `modules/` for it
 4. **Mutations go through public services.** HTTP handlers, CLI commands, tool endpoints, listeners are thin entry points that delegate. State changes never originate in an entry point.
 5. **No junk drawers.** `helpers/`, `util/`, `common/`, `shared/`, `misc/` are forbidden anywhere in the source tree.
 6. **Naming.** Names describe what a class IS, not where it lives. Only a module's faces — its primary public service and the pieces the framework registers per module — carry the module's name; everything it contains, published or not, is named for what it is. Before placing a new class, name 1–2 alternative homes and pick the strongest.
-7. **Optional elements earned.** Framework/variant splits, sub-modules, contracts, wiring files, internal services are added only when they earn their place. A sub-module is a slice of the domain, never a way of presenting it: no sub-module for a page, a screen, a tab, a view, a list, a query or a picker. It owns a record or a rule; if the honest answer to "what does it own?" is "only the list" (or the page, the export), it is not a sub-module. An entity with no owning module gets one, named after the entity, never after the first service it needs. See [`promotion-criteria.md`](promotion-criteria.md).
+7. **Optional elements earned.** Families, sub-modules, contracts, wiring files, internal services are added only when they earn their place. Every child module lives under `modules/`; a family is earned as a whole, and each of its members is then a module whatever its size. A sub-module is a slice of the domain, never a way of presenting it: no sub-module for a page, a screen, a tab, a view, a list, a query or a picker. It owns a record or a rule; if the honest answer to "what does it own?" is "only the list" (or the page, the export), it is not a sub-module. An entity with no owning module gets one, named after the entity, never after the first service it needs. See [`promotion-criteria.md`](promotion-criteria.md).
 
 ## Reading map
 

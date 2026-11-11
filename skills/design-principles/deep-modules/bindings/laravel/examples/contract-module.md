@@ -11,7 +11,7 @@ A module whose entire purpose is to publish a shared abstraction. Multiple indep
 This pattern applies when:
 
 - Multiple **independent** modules need to share an abstraction
-- The implementations live in those independent modules, not as siblings under a parent (otherwise [`variant-framework.md`](variant-framework.md) is the right pattern)
+- The implementers are not kinds of one thing that someone chooses between; each is its own module's way of taking part (otherwise they are a family, and [`family.md`](family.md) is the right pattern)
 - No single module is the natural owner of the abstraction
 - The abstraction is small (one or a few interfaces) and stable
 
@@ -74,18 +74,18 @@ Guarantees:
 - Implementers do not depend on each other; only on the contract.
 ```
 
-## Why this shape (and not `Framework/`)?
+## Why this shape (and not a family)?
 
-A `Framework/` + variants pattern would imply the implementers are siblings under one parent module:
+A family is for kinds of one thing that are chosen between: `Stripe` and `Paypal` are both payment gateways, a charge goes through one of them, and each is a member module under the family module (see [`family.md`](family.md)). Making the implementers here a family would give this:
 
 ```
-app/Modules/Visualizations/                         ← but this implies Reports and Analytics
-├── Framework/Public/Contracts/                       are part of the same family, which
-└── Reports/                                   isn't the case — they're independent
-└── Analytics/                                 top-level domains in the codebase
+app/Modules/Visualization/                ← but this says a report and an analytics
+└── Modules/                                 view are two kinds of one thing, which
+    ├── Report/                              isn't the case — each is a capability
+    └── Analytics/                           of an independent domain
 ```
 
-The variant pattern assumes the variants are *a family* — `Stripe` and `Paypal` are both payment gateways, and they live under `app/Modules/PaymentGateways/`. Reports and Analytics are independent domains that happen to need the same contract; forcing them under a fake umbrella module obscures that.
+Reports and Analytics are independent domains that each *can be visualized*. Nobody picks between them. Each implements the contract with a service it already has; forcing them under a family module obscures that.
 
 A contract module captures the right structure: a small, dedicated module publishes the abstraction; independent modules implement it.
 
@@ -104,8 +104,10 @@ Putting the contract in `Reports/Public/Contracts/` would imply Reports owns the
 Add a contract module when ALL of these are true today:
 
 - Two or more independent modules need to implement the same abstraction
-- Those modules are not siblings under a natural parent (otherwise use `Framework/`)
+- The implementers are not kinds of one thing chosen between (otherwise they are a family: use a family module)
 - No single module is the natural owner of the abstraction
 - The abstraction is small (one or a few interfaces) and stable
 
 If only one implementer exists today, don't pre-create a contract module — wait for the second. The convention's "earned, not speculative" principle applies here: a contract module with one implementer is shallow ceremony.
+
+> **Changed 11 November 2026.** The comparison with the `Framework/` layout became a comparison with a family. Reason: the variant layout is retired; what separates a contract module from a family is whether the implementers are kinds of one thing that are chosen between.

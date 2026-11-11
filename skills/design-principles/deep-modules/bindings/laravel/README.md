@@ -22,7 +22,7 @@ The [Deep Modules](../../README.md) convention names **roles**. This binding say
 | Entry points | `Http/` (controllers, form requests, middleware, resources), `Console/` (Artisan commands), `Jobs/` (`ShouldQueue` classes), `Listeners/` |
 | Wiring | `{Domain}ServiceProvider.php` at the module root (see below) |
 | Sub-modules | `Modules/{SubModule}/` — path reads `app/Modules/Billing/Modules/Calculation/` |
-| Variants | `Framework/` + one directory per variant |
+| Family | A family module `Modules/{Family}/` (singular), members under its `Modules/` — path reads `app/Modules/Payment/Modules/PaymentGateway/Modules/Stripe/`; the member's class is `StripePaymentGateway` |
 | Data-class layers | `Data/Payloads/*ActionPayloadData` (an action's input), `Data/Views/*ViewData` (what a data view returns; replaces the older controller-owned `Data/Http/Controllers/{Controller}/*PropsData`), `*Data` at root (domain) — typically Spatie Laravel Data classes |
 | Junk drawers | `Helpers/`, `Util/`, `Common/`, `Shared/`, `Misc/` forbidden anywhere in `app/` |
 
@@ -41,8 +41,7 @@ app/Modules/{Domain}/
 │   ├── Events/
 │   ├── Exceptions/
 │   └── Contracts/
-├── Framework/                             ← optional — only with variants
-├── Modules/                               ← optional — only with sub-modules
+├── Modules/                               ← optional — every child module: sub-modules and family modules
 ├── Services/
 ├── Models/
 ├── Data/
@@ -94,7 +93,7 @@ Add `{Domain}ServiceProvider.php` when at least one of these is true:
 | Trigger | Example |
 |---|---|
 | Interface → implementation binding | `$this->app->bind(PaymentGatewayContract::class, StripeGateway::class)` |
-| Multiple implementations to map | A variant framework where outside callers depend on a contract; the provider picks the variant |
+| A family member making itself known | A member's provider registers its implementation with the family (for instance `$this->app->tag(StripePaymentGateway::class, PaymentGatewayContract::class)`), and the family's service resolves the tagged members |
 | Singleton with construction logic | A service that holds state and needs setup beyond `new Foo($dep)` |
 | Macros | `Collection::macro('toBilling', …)` |
 | Observers | `Invoice::observe(InvoiceObserver::class)` |
@@ -116,18 +115,20 @@ app/Modules/Billing/
 
 For sub-modules, the provider goes at the sub-module's root following the same rule.
 
-For modules with `Framework/`, the framework provider goes at `Framework/{Domain}FrameworkServiceProvider.php` and handles variant binding (since the framework is what knows about all variants):
+For a family, each **member** has the provider, at the member's root, and it registers that member with the family. The family module has no provider that lists members: nothing above a member knows it exists.
 
 ```
-app/Modules/PaymentGateways/
+app/Modules/Payment/Modules/PaymentGateway/
 ├── README.md
-├── Framework/
-│   └── PaymentGatewaysFrameworkServiceProvider.php   ← binds the active variant
-├── Stripe/
-│   └── (no provider needed — just an implementation)
-└── Paypal/
-    └── (no provider needed — just an implementation)
+├── Public/Services/PaymentGatewayDispatcher.php   ← resolves the registered members; picks one from configuration
+└── Modules/
+    ├── Stripe/
+    │   └── StripeServiceProvider.php              ← registers StripePaymentGateway with the family
+    └── Paypal/
+        └── PaypalServiceProvider.php              ← registers PaypalPaymentGateway with the family
 ```
+
+> **Changed 11 November 2026.** `Framework/` and the framework provider that bound the active variant are removed. A family is a module under `Modules/`, its members are modules under it, and each member's own provider registers it. Reason: a module's root holds only reserved directories, and nothing above a member may know the member exists.
 
 ### Registration
 
@@ -157,7 +158,7 @@ The flat list is a deliberate registration point. Auto-discovery of providers ex
 
 PHP has no package-level visibility: anything `public` on a class is callable from anywhere by FQCN, and PHPStan does not catch cross-module reaches by default. So in Laravel the `Public/` **directory is the boundary**, and an architecture test guards it.
 
-The rule to encode: *nothing outside `App\Modules\X` may depend on `App\Modules\X\*` except `App\Modules\X\Public\*`* (recursively for `Modules/{Sub}/` and `Framework/`).
+The rule to encode: *nothing outside `App\Modules\X` may depend on `App\Modules\X\*` except `App\Modules\X\Public\*`* (recursively for every `Modules/{Child}/`: sub-modules, family modules and a family's members).
 
 Sketch with Pest's architecture plugin:
 
@@ -185,7 +186,7 @@ Tests mirror the module: `tests/Modules/{Domain}/…` (or `tests/App/Modules/{Do
 
 ## Worked examples
 
-Full Laravel trees for each shape — flat domain, domain with sub-modules, variant framework, contract module, and the full pattern — live in [`examples/`](examples/README.md).
+Full Laravel trees for each shape — flat domain, domain with sub-modules, family, contract module, and the full pattern — live in [`examples/`](examples/README.md).
 
 ## See also
 

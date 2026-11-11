@@ -43,8 +43,7 @@ modules/{Domain}/
 │   ├── exceptions/                        ← optional — published exceptions (caught by outsiders)
 │   └── contracts/                         ← optional — published interfaces others implement
 │
-├── framework/                             ← optional — only with variants
-├── modules/                               ← optional — only with sub-modules
+├── modules/                               ← optional — every child module: sub-modules and family modules
 │
 ├── services/                              ← optional — internal services
 ├── models/                                ← optional — persistence entities (internal)
@@ -124,7 +123,7 @@ The ordering above is illustrative, not prescriptive.
 
 ## Decomposed shapes
 
-When a module needs to decompose, the convention provides two structural tools (see the [README](README.md) "Decomposing a module" section for the rationale and [`promotion-criteria.md`](promotion-criteria.md) for the rules).
+When a module needs to decompose, every child goes under `modules/`: a sub-module for a slice, a family module for the kinds of one thing (see the [README](README.md) "Decomposing a module" section for the rationale and [`promotion-criteria.md`](promotion-criteria.md) for the rules).
 
 ### With sub-modules
 
@@ -143,42 +142,83 @@ modules/Billing/
         └── ...
 ```
 
-### With variants
+### With a family
+
+A family is a module named after the family, in the singular. Its members are modules under its `modules/`, all of one shape.
 
 ```
-modules/PaymentGateways/
+modules/Payment/
 ├── README.md
-├── framework/                        ← shared across variants
-│   ├── public/contracts/             ← interface every variant implements
-│   ├── public/services/              ← code that operates on any variant
-│   └── ...
-├── Stripe/                           ← variant — full template
-│   ├── README.md
-│   ├── public/services/
-│   └── ...
-└── Paypal/                           ← variant — full template
-    ├── README.md
-    ├── public/services/
-    └── ...
+├── public/services/                  ← the payment's own services
+└── modules/
+    ├── PaymentGateway/               ← the family module
+    │   ├── README.md                 ← holds the family's table
+    │   ├── public/contracts/         ← interface every member implements
+    │   ├── public/services/          ← code that works on any member
+    │   └── modules/
+    │       ├── Stripe/               ← member — a module
+    │       │   ├── README.md
+    │       │   ├── public/services/  ← StripePaymentGateway
+    │       │   └── ...               ← its client, its sandbox stub, its entry points
+    │       └── Paypal/               ← member — same shape as its sibling
+    │           ├── README.md
+    │           ├── public/services/
+    │           └── ...
+    └── Refund/                       ← an ordinary sub-module beside the family
 ```
 
-### With both
-
-A variant can itself contain sub-modules. The same template applies recursively at every level.
+A family of small members has the same shape. Each member is a module even when it is one class:
 
 ```
-modules/{Domain}/                     ← e.g. PaymentGateways
-├── framework/
-└── {Variant}/                        ← e.g. Stripe
+modules/Reporting/modules/ReportFormat/
+├── README.md
+├── public/contracts/ReportFormat
+└── modules/
+    ├── Csv/
+    │   ├── README.md
+    │   └── public/services/CsvReportFormat
+    ├── Pdf/
+    │   ├── README.md
+    │   └── public/services/PdfReportFormat
+    └── Json/
+        ├── README.md
+        └── public/services/JsonReportFormat
+```
+
+### With members in other modules
+
+A member lives where what it knows lives. When that is another module, that module holds its members under a module of the same family name, and the family's home keeps only the contract, the registry and the table.
+
+```
+modules/Audit/                               ← the family's home
+├── README.md
+├── public/contracts/AuditCheck
+└── public/services/AuditCheckRegistry
+
+modules/Billing/modules/AuditCheck/          ← Billing's members
+└── modules/
+    ├── UnpaidInvoice/
+    └── DuplicateCharge/
+```
+
+### A member with sub-modules
+
+A member is a module, so the template applies inside it too.
+
+```
+modules/{Domain}/modules/{Family}/    ← e.g. Payment, PaymentGateway
+└── modules/{Member}/                 ← e.g. Stripe
     ├── README.md
     ├── public/services/
-    └── modules/{SubModule}/          ← e.g. Webhooks, Refunds
+    └── modules/{SubModule}/          ← e.g. Webhook, Dispute
         ├── README.md
         ├── public/services/
         └── ...
 ```
 
-There is no fixed depth limit, but each level of nesting must earn its place. See [`promotion-criteria.md`](promotion-criteria.md).
+Depth is not a cost to limit: a long path that shows the hierarchy is a summary read without opening a file. What each level must pass is the deletion test on the thing it owns. See [`promotion-criteria.md`](promotion-criteria.md).
+
+> **Changed 11 November 2026.** The "With variants" and "With both" shapes (a `framework/` directory and variant directories at the module's root) are replaced by the family shape. A module's root now holds only reserved directories, so the tree itself says what is structure and what is a child, and one module can hold several families.
 
 ## Where to go next
 
