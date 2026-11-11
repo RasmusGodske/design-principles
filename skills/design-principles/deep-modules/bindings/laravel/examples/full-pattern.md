@@ -1,66 +1,70 @@
 ---
 type: concept-explainer
-title: "Example: Variants AND Sub-Modules — PaymentGateways with Stripe sub-modules"
-description: A worked variant module where one variant has its own sub-modules — the convention applied recursively at full depth.
+title: "Example: A Family Whose Member Has Sub-Modules — Payment Gateways with Stripe sub-modules"
+description: A worked family in Laravel spelling where one member has its own sub-modules — the convention applied recursively at full depth.
 ---
 
-# Example: Variants AND Sub-Modules — PaymentGateways with Stripe sub-modules
+# Example: A Family Whose Member Has Sub-Modules — Payment Gateways with Stripe sub-modules
 
-A variant module where one of the variants has its own internal complexity, decomposed into sub-modules. This shows the convention applied recursively.
+The family from [`family.md`](family.md), where one of the members has its own internal complexity, decomposed into sub-modules. The reasoning is in the [neutral example](../../../examples/full-pattern.md); this is the same tree in Laravel spelling.
 
 ## Shape
 
 ```
-app/Modules/PaymentGateways/
+app/Modules/Payment/
 ├── README.md
-├── Framework/                               ← shared across variants
-│   ├── README.md
-│   ├── Public/Contracts/
-│   │   └── PaymentGatewayContract.php
-│   ├── Public/
-│   │   └── Services/
-│   │       └── PaymentGatewayDispatcher.php
-│   └── Data/
-│       └── ChargeRequestData.php
-├── Stripe/                                  ← variant — has its own sub-modules
-│   ├── README.md
-│   ├── StripeServiceProvider.php
-│   ├── Public/
-│   │   └── Services/
-│   │       └── StripeGateway.php            ← orchestrates Stripe sub-modules
-│   ├── Models/
-│   │   └── StripeAccount.php                ← shared across Stripe sub-modules
-│   └── Modules/
-│       ├── Charges/
-│       │   ├── README.md
-│       │   ├── Public/
-│       │   │   └── Services/
-│       │   │       └── ChargeService.php
-│       │   ├── Services/
-│       │   │   └── StripeChargeApiClient.php
-│       │   └── Data/
-│       ├── Webhooks/
-│       │   ├── README.md
-│       │   ├── Public/
-│       │   │   └── Services/
-│       │   │       └── WebhookProcessor.php
-│       │   ├── Services/
-│       │   │   └── SignatureVerifier.php
-│       │   ├── Http/Controllers/
-│       │   │   └── StripeWebhookController.php
-│       │   └── Data/
-│       └── Refunds/
-│           ├── README.md
-│           ├── Public/
-│           │   └── Services/
-│           │       └── RefundService.php
-│           └── Data/
-└── Paypal/                                  ← variant — flat, simpler
-    ├── README.md
-    ├── Public/
-    │   └── Services/
-    │       └── PaypalGateway.php
-    └── ...
+└── Modules/
+    └── PaymentGateway/                              ← the family module
+        ├── README.md
+        ├── Public/
+        │   ├── Contracts/
+        │   │   └── PaymentGatewayContract.php
+        │   └── Services/
+        │       └── PaymentGatewayDispatcher.php
+        ├── Data/
+        │   └── ChargeRequestData.php
+        └── Modules/
+            ├── Stripe/                              ← member — has its own sub-modules
+            │   ├── README.md
+            │   ├── StripeServiceProvider.php
+            │   ├── Public/
+            │   │   └── Services/
+            │   │       └── StripePaymentGateway.php ← orchestrates Stripe's sub-modules
+            │   ├── Models/
+            │   │   └── StripeAccount.php            ← shared across Stripe's sub-modules
+            │   └── Modules/
+            │       ├── Charges/
+            │       │   ├── README.md
+            │       │   ├── Public/
+            │       │   │   └── Services/
+            │       │   │       └── ChargeService.php
+            │       │   ├── Services/
+            │       │   │   └── StripeChargeApiClient.php
+            │       │   └── Data/
+            │       ├── Webhooks/
+            │       │   ├── README.md
+            │       │   ├── Public/
+            │       │   │   └── Services/
+            │       │   │       └── WebhookProcessor.php
+            │       │   ├── Services/
+            │       │   │   └── SignatureVerifier.php
+            │       │   ├── Http/
+            │       │   │   └── Controllers/
+            │       │   │       └── StripeWebhookController.php
+            │       │   └── Data/
+            │       └── Disputes/
+            │           ├── README.md
+            │           ├── Public/
+            │           │   └── Services/
+            │           │       └── DisputeService.php
+            │           └── Data/
+            └── Paypal/                              ← member — a module with no sub-modules
+                ├── README.md
+                ├── PaypalServiceProvider.php
+                ├── Public/
+                │   └── Services/
+                │       └── PaypalPaymentGateway.php
+                └── ...
 ```
 
 ## Stripe README content
@@ -68,40 +72,41 @@ app/Modules/PaymentGateways/
 ```markdown
 # Stripe
 
-Stripe-specific implementation of the PaymentGatewayContract. Decomposes into Charges (one-time payments), Webhooks (inbound notifications from Stripe), and Refunds (cancellations and partial refunds), unified by StripeGateway as the contract entry point.
+The Stripe member of the payment gateways. Decomposes into Charges (one-time payments), Webhooks (inbound notifications from Stripe), and Disputes (chargebacks raised by the card holder), unified by StripePaymentGateway as the contract entry point.
 
 Public surface:
-- StripeGateway — implements PaymentGatewayContract for Stripe
+- StripePaymentGateway — implements PaymentGatewayContract for Stripe
 
 Sub-modules:
 - Charges — one-time payment processing
 - Webhooks — receives and verifies Stripe webhook callbacks
-- Refunds — issues full or partial refunds
+- Disputes — answers and tracks chargebacks
 
 Guarantees:
-- StripeGateway delegates to the appropriate sub-module based on the contract method
+- StripePaymentGateway delegates to the appropriate sub-module based on the contract method
 - Webhook signature verification runs before any sub-module processes payload
 ```
 
 ## Why this shape
 
-This combines what the previous examples showed:
-
-- **Top level uses the variant pattern** because PaymentGateways has multiple providers (`Framework/` + `Stripe/` + `Paypal/`).
-- **Stripe variant uses sub-modules** because Stripe has three independent areas of complexity — charges, webhooks, refunds — each with its own services and (for webhooks) HTTP entry. Inlining them would bloat `Stripe/Public/Services/StripeGateway`.
-- **Paypal variant stays flat** because Paypal's implementation is simpler. A flat module is enough.
-- **Stripe's parent has `Public/Services/`** because `StripeGateway` orchestrates the sub-modules to fulfill `PaymentGatewayContract`. The contract requires a single entry point per variant.
-- **Stripe has `Models/StripeAccount`** at the variant root because both Charges and Refunds reference it. Promoting to the parent avoids cross-sub-module model imports.
+- **The gateways are a family**, so there is a family module `PaymentGateway/` under `Payment/Modules/`, and each provider is a member module under `PaymentGateway/Modules/`.
+- **The Stripe member uses sub-modules** because Stripe has three independent areas of complexity — charges, webhooks, disputes — each with its own services and (for webhooks) an HTTP layer. Inlining them would bloat `Stripe/Public/Services/StripePaymentGateway`.
+- **The Paypal member has none** because Paypal's implementation is simpler.
+- **Stripe's root has `Public/Services/`** because `StripePaymentGateway` orchestrates the sub-modules to fulfill `PaymentGatewayContract`. The contract requires a single entry point per member.
+- **Stripe has `Models/StripeAccount`** at the member's root because both Charges and Disputes reference it.
 
 ## What this demonstrates
 
-- **Recursion of the convention.** A variant is a module; a module can have sub-modules. The same template applies at every level.
-- **Asymmetric variants.** Don't force Paypal to have `Modules/` just because Stripe does. The convention is "shape earned by complexity" — Paypal's code didn't earn it.
-- **The contract drives the parent shape.** `PaymentGatewayContract` requires a single entry point per variant, which is why `StripeGateway` exists at `Stripe/Public/Services/` even though it mostly delegates. The orchestration enforces the contract; that earns the parent's public service.
+- **Recursion of the convention.** A member is a module; a module can have sub-modules. The same template applies at every level.
+- **Depth is not a cost.** `app/Modules/Payment/Modules/PaymentGateway/Modules/Stripe/Modules/Webhooks/` is a long path and a long namespace, and each segment says something: whose it is, which family, which member, which slice.
+- **"The same shape" means every member is a module with the same face**, not that every member has the same directories. Both members implement the contract from `Public/Services/` and register through their own provider. What a member holds inside is earned by that member. A sibling is not given empty sub-modules to match a bigger one.
 
 ## Where alternative shapes would be wrong
 
-- **Forcing both variants into the same shape** — uniformity for its own sake adds ceremony without value.
-- **Stripe sub-modules as siblings of Stripe** (e.g., `app/Modules/PaymentGateways/StripeCharges/`, `StripeWebhooks/`) — that hides the variant relationship and makes "is this a Stripe thing?" hard to answer at a glance.
-- **No `Modules/` for Stripe** — three independent areas (charges/webhooks/refunds) all crammed into one `Services/` directory makes the module hard to navigate.
-- **`StripeAccount` placed inside one sub-module** — both Charges and Refunds need it. Putting it inside one creates a cross-sub-module dependency; promoting to the variant root is correct.
+- **Stripe's sub-modules as siblings of Stripe** (`PaymentGateway/Modules/StripeCharges/`, `StripeWebhooks/`) — that makes them look like members of the family.
+- **Stripe's sub-modules lifted into the family module** "so Paypal can use them later" — the family module holds only what every member uses today.
+- **No `Modules/` for Stripe** — three independent areas crammed into one `Services/` directory makes the member hard to navigate.
+- **`StripeAccount` placed inside one sub-module** — both Charges and Disputes need it; the member's root is correct.
+- **Paypal as a loose class in the family module because it is small** — a family never mixes classes and modules.
+
+> **Changed 11 November 2026.** The example was "Variants AND Sub-Modules" on the `Framework/` layout; it is now a family module whose member has sub-modules. Reason: the variant layout is retired and depth is no longer treated as a cost.

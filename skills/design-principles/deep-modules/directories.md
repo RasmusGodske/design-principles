@@ -71,10 +71,10 @@ Only things on the public surface are importable from outside the module. Placin
 
 ### `public/contracts/`
 
-- **Purpose:** Interfaces (occasionally abstract classes) for shared abstraction or variant abstraction.
-- **Contents:** Interfaces. Concrete implementations live elsewhere — in `public/services/`, in variant directories, or in independent modules that implement the contract.
+- **Purpose:** Interfaces (occasionally abstract classes) for a shared abstraction or a family's contract.
+- **Contents:** Interfaces. Concrete implementations live elsewhere — in `public/services/`, in a family's member modules, or in independent modules that implement the contract.
 - **Imported by:** Any module.
-- **When to add:** When at least one of these is true: (a) ≥2 implementations exist today, (b) the module is a host that variants plug into (paired with `framework/`), or (c) the module IS a **contract module** — its entire purpose is to publish a shared abstraction that independent modules implement. Adding a contract for a service with one implementation in a leaf module is shallow ceremony — don't.
+- **When to add:** When at least one of these is true: (a) ≥2 implementations exist today, (b) the module is a **family module** — the contract every member implements lives in the family module's `public/contracts/` (see [`README.md`](README.md#families--for-kinds-of-the-same-thing)), or (c) the module IS a **contract module** — its entire purpose is to publish a shared abstraction that independent modules implement. Adding a contract for a service with one implementation in a leaf module is shallow ceremony — don't.
 
 ## Internal — only the module imports from these
 
@@ -110,17 +110,19 @@ Outside callers may not import directly. Routing here goes through the module's 
 
 ### `modules/`
 
-- **Purpose:** Container for sub-modules.
-- **Contents:** Sub-module directories, each a slice of the domain that owns a record or a rule (never a page, screen, view, list or query of it), each following the same template recursively.
-- **Imported by:** Outside callers may import a sub-module's public surface directly — sub-modules are public peers by default.
-- **When to add:** When a piece of the module has enough internal complexity to justify hiding behind its own interface. See [`promotion-criteria.md`](promotion-criteria.md).
+- **Purpose:** The one place for a module's children. Nothing else at a module's root is a child: the root holds only `README.md`, the wiring file and the reserved role directories on this page.
+- **Contents:** Child module directories, each following the same template recursively. A child is either a **sub-module**, a slice of the domain that owns a record or a rule (never a page, screen, view, list or query of it), or a **family module**, named after a family in the singular, whose own `modules/` holds the family's members.
+- **Imported by:** Outside callers may import a child's public surface directly — sub-modules are public peers by default.
+- **When to add:** When a piece of the module has enough internal complexity to justify hiding behind its own interface, or when a family gets its second member. See [`promotion-criteria.md`](promotion-criteria.md).
 
-### `framework/`
+### A family module (`modules/{Family}/`)
 
-- **Purpose:** Shared infrastructure across variants of a module.
-- **Contents:** Contracts every variant implements (`framework/public/contracts/`), services that operate on any variant (`framework/public/services/`), shared models, enums, etc.
-- **Imported by:** Variants of this module use it freely. Outside callers may import its public surface (`framework/public/**`) under the same rules as any other module.
-- **When to add:** When the module hosts multiple variants of the same thing and you can name the variant axis cleanly. See [`promotion-criteria.md`](promotion-criteria.md) and [`framework-and-implementation`](../framework-and-implementation/README.md).
+- **Purpose:** The home of a family: the kinds of one thing that are chosen between.
+- **Contents:** The contract every member implements (`public/contracts/`), the code that works on any member (`public/services/`, internal `services/`, shared data and enums), the family's table in its `README.md`, and the members, each a module under its `modules/`. It contains nothing that names a member.
+- **Imported by:** Outside callers import its public surface like any module's. Members import it freely.
+- **When to add:** When the second member exists and the family has a clean name. See [`promotion-criteria.md`](promotion-criteria.md#family--kinds-of-the-same-thing) and [`framework-and-implementation`](../framework-and-implementation/README.md) for what may live in the family module rather than in a member.
+
+> **Changed 11 November 2026.** The `framework/` directory is removed from this reference. Shared code of a family now lives in the family module, a normal module under `modules/`, and the members are modules under it. A module's root therefore holds only reserved directories, and the tree shows what is structure and what is a child.
 
 ## Wiring
 
@@ -128,8 +130,8 @@ Outside callers may not import directly. Routing here goes through the module's 
 
 - **Purpose:** Module-level wiring that the stack cannot infer on its own — interface→implementation bindings, singletons with construction logic, observer/hook registration, manual event wiring.
 - **Required:** No. **Default: no wiring file.** Most stacks resolve constructor dependencies, discover listeners, and register routes without a per-module file; a module that is just services, models, and entry points using constructor injection needs nothing.
-- **When to add:** On the *first real* need — a variant framework whose callers depend on a contract and something must pick the implementation; a singleton that needs setup beyond `new Foo(dep)`; observers or hooks the stack doesn't auto-discover. If none apply: no wiring file.
-- **Where it lives:** At the module root, beside `README.md`. For sub-modules, at the sub-module's root. For modules with `framework/`, the framework's wiring file is the one that binds the active variant (the framework is what knows about all variants); variants themselves usually need none.
+- **When to add:** On the *first real* need — a family member that must make itself known to its family's registry; a singleton that needs setup beyond `new Foo(dep)`; observers or hooks the stack doesn't auto-discover. If none apply: no wiring file.
+- **Where it lives:** At the module root, beside `README.md`. For sub-modules, at the sub-module's root. In a family, a member's wiring (where the stack needs any) makes that member known to the family, and the family module's wiring names no member: nothing above a member knows it exists. Which member is used at run time is chosen from configuration by the family's own service, among whatever members made themselves known. A member is then added or removed without touching the family, and a test can register a fake member. Two alternatives are ruled out: a list of members in the wiring one level above them (adding a member becomes a change in two places), and finding members by scanning paths (code tied to the file layout).
 - **Anti-patterns:**
   - **Empty wiring files.** A registration with nothing to register is dead weight — delete it.
   - **One mega-registration.** Stuffing every module's bindings into the application's root wiring couples bootstrap to module internals. If a module needs bindings, give it its own file.
@@ -158,8 +160,7 @@ The single rule:
 | `models/` | ❌ |
 | `entrypoints/` (http, cli, jobs, listeners) | ❌ |
 | wiring file | ❌ (the application bootstrap references it; nothing imports from it) |
-| `framework/` | Same rule, recursively. `framework/public/**` ✅ — everything else in `framework/` ❌ |
-| `modules/{SubModule}/` | Same rule, recursively. Sub-modules are modules — apply the table to each. |
+| `modules/{Child}/` | Same rule, recursively. Sub-modules, family modules and a family's members are all modules — apply the table to each. |
 
 ## Where to go next
 

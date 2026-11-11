@@ -22,7 +22,7 @@ The [Deep Modules](../../README.md) convention names **roles**. This binding say
 | Entry points | `{name}.controller.ts` (HTTP), `{name}.guard.ts`, `{name}.middleware.ts`, scheduled services; a CLI entry point is a plain script at `src/` |
 | Wiring | `{domain}.module.ts` — the `@Module()` descriptor: `imports`, `providers`, `controllers`, `exports` |
 | Sub-modules | `src/modules/{domain}/modules/{sub}/` — same template |
-| Variants | `framework/` + one directory per variant |
+| Family | A family module `src/modules/{domain}/modules/{family}/` (singular) with its members under its own `modules/` — same template at every level. (Changed 11 November 2026: this row was "Variants: `framework/` + one directory per variant"; that layout is retired because a module's root holds only reserved names and every child module lives under `modules/`.) |
 | Junk drawers | `common/`, `shared/`, `utils/`, `helpers/`, `misc/` forbidden anywhere under `src/` |
 
 Directory names are lowercase to match Nest's file naming. Nest's `{name}.{role}.ts` suffix already encodes the role, so the neutral `services/`, `models/`, `entrypoints/` sub-directories are **not** added — a flat module directory with suffixed files is the Nest idiom and reads the same way.

@@ -54,26 +54,35 @@ modules/Billing/
             └── InvoiceRenderingService
 ```
 
-### Template — variant module
+### Template — module with a family
 
 ```
-modules/PaymentGateways/
+modules/Payment/
 ├── README.md
-├── framework/
-│   └── public/
-│       ├── contracts/
-│       │   └── PaymentGatewayContract
-│       └── services/
-│           └── PaymentGatewayDispatcher
-├── Stripe/
-│   ├── README.md
-│   └── public/services/
-│       └── StripeGateway
-└── Paypal/
-    ├── README.md
-    └── public/services/
-        └── PaypalGateway
+└── modules/
+    ├── PaymentGateway/
+    │   ├── README.md
+    │   ├── public/
+    │   │   ├── contracts/
+    │   │   │   └── PaymentGateway
+    │   │   └── services/
+    │   │       └── PaymentGatewayDispatcher
+    │   └── modules/
+    │       ├── Stripe/
+    │       │   ├── README.md
+    │       │   └── public/services/
+    │       │       └── StripePaymentGateway
+    │       └── Paypal/
+    │           ├── README.md
+    │           └── public/services/
+    │               └── PaypalPaymentGateway
+    └── Refund/
+        ├── README.md
+        └── public/services/
+            └── RefundService
 ```
+
+Draw the full path down to the members. The depth is the information: it shows which module the family belongs to and that the members are its kinds. (Changed 11 November 2026: this template replaces the "variant module" one, because the `framework/` plus variant-directories layout is retired and a family is now a module under `modules/`.)
 
 ### Annotation conventions
 

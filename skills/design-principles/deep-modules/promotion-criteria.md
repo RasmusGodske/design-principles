@@ -17,7 +17,7 @@ The unifying lens is the **deletion test** — imagine deleting the element:
 - If complexity reappears in callers, the element was hiding it. Keep it.
 - If nothing changes, the element was a pass-through. Remove it.
 
-This applies recursively — to modules, sub-modules, contracts, framework directories, and wiring files.
+This applies recursively — to modules, sub-modules, families, contracts, and wiring files.
 
 ## Internal `services/`
 
@@ -35,7 +35,7 @@ This applies recursively — to modules, sub-modules, contracts, framework direc
 
 **Promote when:** a piece of the module has enough internal complexity that hiding it behind a smaller interface improves the parent. Apply the deletion test: *if you inlined the sub-module back into the parent's `services/`, `data/`, and `models/`, would the parent get noticeably worse to navigate?*
 
-**Do not promote when:** the candidate is one or two services. That is shallow ceremony — keep it flat.
+**Do not promote when:** the candidate is one or two services. That is shallow ceremony — keep it flat. **This rule does not apply to a member of a family**: a member is always a module, even with one class, because the deletion test is applied to the family as a whole (see [Family](#family--kinds-of-the-same-thing) below).
 
 **A sub-module is a slice of the domain, never a way of presenting it.** Its name is something the domain *has* (invoicing, calculation, invitations), not a place it is shown. A page, a screen, a tab, a report layout or a view of the module's data presents the parent's entities, so it belongs to the parent, however many classes it takes: its view shapes and the services that build them sit beside the parent's other public services. Two reasons:
 
@@ -54,27 +54,43 @@ A list, a search, a query endpoint or a picker's data is a presentation too, how
 >
 > Counter-example: A small "send a payment reminder" feature is just one service. It stays as `public/services/PaymentReminderService`. Wrapping it in `modules/Reminders/` would be ceremony with no payoff.
 
-## `framework/` — variants
+## Family — kinds of the same thing
 
 **Default:** absent.
 
-**Promote when:** the module exists in multiple kinds or versions that need to evolve independently AND you can name the variant axis cleanly.
+**Promote when:** a second member exists AND you can name the family cleanly (the question its members answer: "which payment gateway?", "which report format?"). The family then becomes a module named after it, in the singular, under the owning module's `modules/`, and every member becomes a module under the family module's `modules/`.
 
-**Do not promote when:** the variant axis is hypothetical ("we might add another payment provider someday"). Promote when the second variant exists, not before.
+**Do not promote when:** the second member is hypothetical ("we might add another payment provider someday"). Until it exists, the family is a name and a one-row table ([`concept-families`](../concept-families/README.md), rule 4), and the single implementation stays where it is.
 
-> Example: `modules/PaymentGateways/` ships with both Stripe and Paypal integrations. The variant axis is "gateway provider" — clearly named. Shared infrastructure (a `PaymentGatewayContract`, services that operate on any gateway) goes in `framework/`. Each provider gets its own variant directory.
+**A value or a family?** Kinds that are only labels, stored and compared, stay a value (an enumeration). Kinds become a family of member modules the moment any kind has behaviour of its own: code that branches on the value, including a method on the enumeration that answers per case. An enumeration that grows such methods (`needsRedirect()`, `supportsRefunds()`, …) is holding pieces of each member's behaviour with no module for them to live in.
+
+Once the family module exists, three things hold without further judgment:
+
+- **A member is always a module, and all members have one shape.** A one-class member is a module like its larger siblings; no family mixes loose classes and modules, and no member is promoted later. A new member is made by copying a sibling.
+- **The deletion test is applied to the family, never to one member.** Callers learn only the family's contract, so a member adds nothing to what they must know, whatever its size. Asking "does this small member earn a module?" is the wrong question; ask whether the family earns its contract.
+- **A member brings everything it needs.** Its tests, fakes, fixtures, entry points and pages live inside it, also when a sibling has similar ones. Only the contract and code that truly serves every member lives in the family module, and nothing in the family module names a member.
+
+A member lives where what it knows lives: under the family module when it knows only the family's subject, otherwise in the module that owns what it knows, under a module of the same family name (`modules/Billing/modules/AuditCheck/modules/UnpaidInvoice/`).
+
+> Example: `modules/Payment/` charges through both Stripe and Paypal. The family is "payment gateway" — clearly named. It becomes `modules/Payment/modules/PaymentGateway/`, holding the `PaymentGateway` contract and the services that work on any gateway. Each provider is a member module under its `modules/`, carrying its own client and its own sandbox stub.
 >
-> Counter-example: `modules/Notifications/` sends emails today. There's a vague sense that SMS might come later. **Don't** promote yet — wait for the second variant. A `framework/` with one variant is harder to read than a flat module.
+> Example: a report can be written as CSV, PDF or JSON, each a single class. They are still three member modules under `modules/ReportFormat/modules/`, not three classes in a directory, and not an enumeration with a method per question.
+>
+> Counter-example: `modules/Notification/` sends emails today. There's a vague sense that text messages might come later. **Don't** promote yet — wait for the second member. A family module with one member is harder to read than a flat module.
+>
+> Counter-example: both gateways need a fake provider for local runs, so one shared fake goes into the family module and asks each member what to answer. Now the family knows its members. Give each member its own stub.
+
+> **Changed 11 November 2026.** This section replaces "`framework/` — variants". The promotion test is unchanged (a second member, a clean name); what is new is that the family is a module under `modules/`, that members are always modules of one shape, and that the deletion test is applied to the family as a whole. Reason: the old layout had no shape for small members and left the "is this member big enough?" question open for every member.
 
 ## `contracts/`
 
 **Default:** absent.
 
-**Promote when:** ≥2 implementations exist today, OR the module is a framework that variants plug into.
+**Promote when:** ≥2 implementations exist today, OR the module is a family module whose members implement it.
 
 **Do not promote when:** there is one implementation. The service class IS the contract.
 
-> Example: `framework/public/contracts/PaymentGatewayContract` defines what every gateway must implement. Stripe and Paypal both implement it. That qualifies.
+> Example: `modules/PaymentGateway/public/contracts/PaymentGateway` defines what every gateway must implement. Stripe and Paypal both implement it. That qualifies.
 >
 > Counter-example: A `BillingService` with one method, `chargeCustomer()`. Wrapping it in a `BillingContract` interface "for testability" is shallow ceremony — mock the concrete class. Extract the interface only when a second implementation actually exists.
 
@@ -82,7 +98,7 @@ A list, a search, a query endpoint or a picker's data is a presentation too, how
 
 **Default:** absent. Most modules don't need one.
 
-**Promote when:** the module has something for the wiring to do — variant bindings, observers/hooks the stack doesn't discover, non-trivial singletons, or manual event wiring.
+**Promote when:** the module has something for the wiring to do — a family member making itself known to its family, observers/hooks the stack doesn't discover, non-trivial singletons, or manual event wiring.
 
 **Do not promote when:** the module is just services, models, and entry points using constructor injection.
 
@@ -109,7 +125,7 @@ Also **when the parent is named after an entity and owns it**: an `Order` domain
 
 Each "earned, not speculative" decision compounds. A module that adds nothing speculatively is small and easy to navigate. A module that adds everything speculatively is full of empty directories, one-implementation interfaces, and delegating facades — noise that obscures the real shape.
 
-When in doubt: **leave it out.** It is much cheaper to add an element later than to remove one once it is wired up.
+When in doubt: **leave it out.** It is much cheaper to add an element later than to remove one once it is wired up. Depth is not what this guards against: a long path that shows a real hierarchy costs nothing. The cost is an element that owns nothing.
 
 ## See also
 

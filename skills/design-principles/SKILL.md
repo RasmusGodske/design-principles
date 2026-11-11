@@ -37,6 +37,7 @@ These are **lenses** — ways of looking at a design or a diff that sharpen the 
 |---|---|
 | Planning a feature or sprint that adds new public interface surface | Deep Modules (deletion test), then Detachable Domain |
 | Creating a module / service / class, or asking "where does this go?" | Deep Modules → `decision-tree.md`, `directories.md` |
+| Adding a new kind of something that has kinds (a provider, a format, an engine version), or laying out a module that has them | Concept Families for the name and the table, then Deep Modules → the family rules in its `README.md` |
 | Writing a computation (pricing, validation, transformation) | Pure Core, Persistent Shell |
 | Letting code in one domain reach another domain's data | Detachable Domain |
 | Designing a data class, an id, a reference, an export/import | Config and Record |
@@ -70,7 +71,7 @@ They compose rather than compete — each makes a different claim:
 - **Acting on Behalf** is about *who may see and do what*: every read and write an actor asks for passes one thin on-behalf service that checks the actor, passes their limits down, and delegates. It builds on detachable-domain (the base service behind it is the entity's owning service) and stands in front of single-chokepoint (the on-behalf service calls the one writer and never writes itself). Where single-chokepoint says reads need no chokepoint for consistency, this lens gives them one for disclosure.
 - **Data View** is about *what a view contains*: one data view per view composes the on-behalf services' answers (embed, never edit) into one view shape that any presentation can show. It builds on acting-on-behalf, which decides what each actor may see; a data view never looks at the actor itself.
 - **Explicit Names** is about *what a line says on its own*: a variable is named after its declared type, a method after its action and what it acts on, so understanding one line needs no trip to another file. It complements deep-modules' naming page, which names the class itself; this lens names the variables, properties and methods that use it.
-- **Concept Families** is about *what the ways of doing a job are called, together*: every new way starts a family or joins one, and the family is written down with each member's name and what it solves that the others do not. It is explicit-names one level up (concepts, not identifiers), gives deep-modules' variant axis its name before there is a second variant, and keeps framework-and-implementation's rule that shared code waits for evidence: a family of one is a name and a table, not structure.
+- **Concept Families** is about *what the ways of doing a job are called, together*: every new way starts a family or joins one, and the family is written down with each member's name and what it solves that the others do not. It is explicit-names one level up (concepts, not identifiers), gives deep-modules' family module its name before there is a second member (in the file tree a family is a module, and each member a module under it), and keeps framework-and-implementation's rule that shared code waits for evidence: a family of one is a name and a table, not structure.
 - **Safe Deletion** is about *removal*: whether a user may delete something, may only archive it, or is refused because something live uses it. It takes config-and-record's split as its vocabulary (records are the history it protects, frozen copies are how a configuration's past survives a change) and applies single-chokepoint to the question "may this go?" — one dependency check per entity, consulted by every remove path.
 - **Retire, Don't Erase** is safe-deletion's counterpart for migrations: instead of dropping a column or table, retire it, and back up existing values before changing them, so a rollback brings the data back. Data-minimization bounds it: a backup keeps only what the rollback needs.
 - **Testing** insists that where a test lives is derived from its subject, and that everything that *isn't* the subject — how expensive the test is to run — moves out of the path and into a declaration inside the test. It leans on deep-modules for *what* a test should target (a module's public promise, not its internals).
@@ -81,7 +82,7 @@ The code lenses share one tool — the data class as the medium across boundarie
 
 ## Stacks and bindings
 
-The principle docs use an illustrative, language-neutral vocabulary for a module's parts — `modules/{domain}/` with `public/` (the surface), `services/`, `models/`, `data/`, `enums/`, `entrypoints/{http,cli,jobs,listeners}/`, `modules/` (sub-modules), `framework/` (variants), and a wiring file. Real directory names, the wiring mechanism, and the enforcement tool differ per stack. That mapping is a **binding**, and it lives beside the principle it binds, one directory per stack:
+The principle docs use an illustrative, language-neutral vocabulary for a module's parts — `modules/{domain}/` with `public/` (the surface), `services/`, `models/`, `data/`, `enums/`, `entrypoints/{http,cli,jobs,listeners}/`, `modules/` (every child module: sub-modules, and family modules whose members are modules under them), and a wiring file. A module's root holds only these reserved directories. Real directory names, the wiring mechanism, and the enforcement tool differ per stack. That mapping is a **binding**, and it lives beside the principle it binds, one directory per stack:
 
 ```
 <principle>/bindings/<stack>/README.md      e.g. deep-modules/bindings/laravel/README.md
@@ -94,6 +95,10 @@ How to use them:
 1. Detect the stack from the repo (`composer.json` → laravel/php, `pyproject.toml` → python, `package.json` → node/typescript, `go.mod` → go, `Cargo.toml` → rust, …).
 2. When you read a principle, check whether `<principle>/bindings/<stack>/` exists. If it does, read it alongside the principle — it tells you the real names and the enforcement mechanism.
 3. If it does not, apply the principle directly: use the language's native visibility mechanism for the public surface (package-private, `internal/`, `pub`, index re-exports, `__all__`), the stack's idiomatic wiring, and the test runner's tagging for cost tiers. At the end of the task, propose a new binding file for that stack in the same shape as the laravel one — but only from what you actually verified in that codebase; do not invent conventions.
+
+## Changes
+
+- 11 November 2026: deep-modules' variant layout (`framework/` plus one directory per variant at a module's root) is retired. Every child module lives under `modules/`; a family is a module named after the family, in the singular; a member is always a module, of the same shape as its siblings; a member lives where what it knows lives; depth is not a cost; a member brings everything it needs and nothing above it knows it exists. Reason: the old layout left members unmarked among reserved directories, gave a module two places for children and room for one family, and had no shape for small members.
 
 ## Rules for editing these docs
 

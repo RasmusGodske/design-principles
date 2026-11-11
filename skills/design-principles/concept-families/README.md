@@ -88,8 +88,8 @@ Update the table and names in the same change, and keep old names as "formerly c
 
 ### 8. Write it where the next person will look
 
-1. **Members sit together** (one module or directory): put the table in that directory's README, under the family's name.
-2. **Members are spread out:** put the table in the family's natural home, and give each member a short note pointing to it.
+1. **The family has a module in the code** (a family module, see [`deep-modules`](../deep-modules/README.md#families--for-kinds-of-the-same-thing)): put the table in the family module's README, under the family's name. This also holds when members live in several modules: the family's home module has the table, and each member's README points to it.
+2. **The family has no module** (a family of one, or members that are not code): put the table in the README of the module or directory that owns the members, or in the family's natural home when they are spread out, and give each member a short note pointing to it.
 3. **Users choose between members:** also put it in the product documentation, using the same names.
 
 Keep one table per family. Everything else links to it.
@@ -116,8 +116,10 @@ Keep one table per family. Everything else links to it.
 ## Relation to the other lenses
 
 - [`explicit-names`](../explicit-names/README.md) names variables and methods; this lens names concepts and ways of doing things. They meet where a member's name becomes an identifier.
-- [`deep-modules`](../deep-modules/README.md): its variants are a family in the file tree, and it already asks you to "name the variant axis cleanly". This lens asks for the name earlier, as words and a table rather than structure.
+- [`deep-modules`](../deep-modules/README.md) gives a family its shape in the file tree: a module named after the family, in the singular, holding the contract, the shared code and this table, with every member a module under it, named by rule 3 (the family's noun in the class, not in the directory). It asks for a second member and a clean name before that module exists. This lens asks for the name earlier, as words and a table rather than structure.
 - [`framework-and-implementation`](../framework-and-implementation/README.md): shared code grows on evidence. A family of one is a name, not early shared code.
 - [`single-chokepoint-per-fact`](../single-chokepoint-per-fact/README.md): one place writes each fact; here, one table holds each family.
 - [`documentation-placement`](../documentation-placement/README.md) and [`discoverable-knowledge`](../discoverable-knowledge/README.md) decide where the table lives and that it can be found.
 - [`config-and-record`](../config-and-record/README.md) settles a family of two for every entity. This lens is the general form.
+
+> **Changed 11 November 2026.** Rule 8 now says the table lives in the family module's README when the family has a module, and the relation to deep-modules points at the family shape instead of at "variants". Reason: deep-modules retired the variant layout (`framework/` plus variant directories at a module's root); a family is now a module under `modules/` with its members as modules under it, so the family has one obvious README.
