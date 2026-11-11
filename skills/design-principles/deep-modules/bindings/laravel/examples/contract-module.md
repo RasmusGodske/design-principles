@@ -87,7 +87,7 @@ app/Modules/Visualization/                ← but this says a report and an anal
 
 Reports and Analytics are independent domains that each *can be visualized*. Nobody picks between them. Each implements the contract with a service it already has; forcing them under a family module obscures that.
 
-A contract module captures the right structure: a small, dedicated module publishes the abstraction; independent modules implement it.
+A contract module captures the right structure: a small, dedicated module publishes the abstraction; independent modules implement it, each with an ordinary service of its own. In both shapes the module that holds the contract never imports an implementer.
 
 ## Why this shape (and not embedding the contract in one of the implementers)?
 

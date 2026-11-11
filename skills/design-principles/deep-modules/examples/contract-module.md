@@ -85,7 +85,7 @@ modules/visualization/                    ← but this says a report and an anal
 
 Reports and Analytics are independent domains that each *can be visualized*. Nobody picks between them, and neither is a member that could be copied to make the next one. Each implements the contract with a service it already has. Forcing them under a family module obscures that.
 
-A contract module captures the right structure: a small, dedicated module publishes the abstraction; independent modules implement it.
+A contract module captures the right structure: a small, dedicated module publishes the abstraction; independent modules implement it, each with an ordinary service of its own. In both shapes the module that holds the contract never imports an implementer.
 
 A family can also have its members spread over several modules: each member then sits in the module that owns what it knows, under a module named after the family, and the family's home keeps the contract and a registry (see the family rules in the [README](../README.md#families--for-kinds-of-the-same-thing)). The difference from a contract module is the same: those members are kinds of one thing, listed in one table and chosen between.
 

@@ -99,7 +99,7 @@ Guarantees:
 
 - **Recursion of the convention.** A member is a module; a module can have sub-modules. The same template applies at every level.
 - **Depth is not a cost.** `app/Modules/Payment/Modules/PaymentGateway/Modules/Stripe/Modules/Webhooks/` is a long path and a long namespace, and each segment says something: whose it is, which family, which member, which slice.
-- **"The same shape" means every member is a module with the same face**, not that every member has the same directories. Both members implement the contract from `Public/Services/` and register through their own provider. What a member holds inside is earned by that member.
+- **"The same shape" means every member is a module with the same face**, not that every member has the same directories. Both members implement the contract from `Public/Services/` and register through their own provider. What a member holds inside is earned by that member. A sibling is not given empty sub-modules to match a bigger one.
 
 ## Where alternative shapes would be wrong
 

@@ -62,6 +62,8 @@ A list, a search, a query endpoint or a picker's data is a presentation too, how
 
 **Do not promote when:** the second member is hypothetical ("we might add another payment provider someday"). Until it exists, the family is a name and a one-row table ([`concept-families`](../concept-families/README.md), rule 4), and the single implementation stays where it is.
 
+**A value or a family?** Kinds that are only labels, stored and compared, stay a value (an enumeration). Kinds become a family of member modules the moment any kind has behaviour of its own: code that branches on the value, including a method on the enumeration that answers per case. An enumeration that grows such methods (`needsRedirect()`, `supportsRefunds()`, …) is holding pieces of each member's behaviour with no module for them to live in.
+
 Once the family module exists, three things hold without further judgment:
 
 - **A member is always a module, and all members have one shape.** A one-class member is a module like its larger siblings; no family mixes loose classes and modules, and no member is promoted later. A new member is made by copying a sibling.

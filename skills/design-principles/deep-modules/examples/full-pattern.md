@@ -94,7 +94,7 @@ This combines what the previous examples showed:
 
 - **Recursion of the convention.** A member is a module; a module can have sub-modules. The same template applies at every level.
 - **Depth is not a cost.** `payment/modules/payment-gateway/modules/stripe/modules/webhooks/` is a long path, and each segment says something: whose it is, which family, which member, which slice. Nothing was flattened to save a level. Each level passes the deletion test on what it owns.
-- **"The same shape" means every member is a module with the same face**, not that every member has the same directories. Stripe and Paypal are both modules, both implement `PaymentGateway` from `public/services/`, both make themselves known through their own wiring. What a member holds *inside* is earned by that member: Paypal gets no `modules/` because Stripe has one.
+- **"The same shape" means every member is a module with the same face**, not that every member has the same directories. Stripe and Paypal are both modules, both implement `PaymentGateway` from `public/services/`, both make themselves known through their own wiring. What a member holds *inside* is earned by that member: Paypal gets no `modules/` because Stripe has one. A sibling is not given empty sub-modules to match a bigger one.
 - **The contract drives the member's surface.** `PaymentGateway` requires a single entry point per member, which is why `StripePaymentGateway` exists at `stripe/public/services/` even though it mostly delegates.
 
 ## Where alternative shapes would be wrong
